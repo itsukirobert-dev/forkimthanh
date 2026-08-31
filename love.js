@@ -66,6 +66,9 @@ function selectShape(shapeId) {
     if (shapeIcon) shapeIcon.textContent = curShape.icon;
     if (shapeName) shapeName.textContent = curShape.name;
 
+    const mobShapeIcon = document.getElementById("mobShapeIcon");
+    if (mobShapeIcon) mobShapeIcon.textContent = curShape.icon;
+
     document.querySelectorAll("#shapeChips .hub-chip").forEach(chip => {
         if (chip.getAttribute("data-shape") === curShape.id) {
             chip.classList.add("active");
@@ -636,6 +639,9 @@ function selectTheme(themeId) {
     curTheme = THEMES[themeKeys[currentThemeIdx]];
     if (themeIcon) themeIcon.textContent = curTheme.icon;
     if (themeName) themeName.textContent = curTheme.name;
+
+    const mobThemeIcon = document.getElementById("mobThemeIcon");
+    if (mobThemeIcon) mobThemeIcon.textContent = curTheme.icon;
 
     document.querySelectorAll("#themeChips .hub-chip").forEach(chip => {
         if (chip.getAttribute("data-theme") === themeKeys[currentThemeIdx]) {
@@ -1453,6 +1459,14 @@ function addMouseTrailParticle(x, y) {
     if (trailParticles.length > 35) trailParticles.splice(0, trailParticles.length - 35);
 }
 
+function triggerHaptic(pattern = 25) {
+    if ("vibrate" in navigator) {
+        try {
+            navigator.vibrate(pattern);
+        } catch (e) { }
+    }
+}
+
 window.addEventListener("mousemove", (e) => {
     targetTiltX = (e.clientX - width / 2) / (width / 2);
     targetTiltY = (e.clientY - height / 2) / (height / 2);
@@ -1461,7 +1475,17 @@ window.addEventListener("mousemove", (e) => {
 
 window.addEventListener("touchmove", (e) => {
     if (e.touches && e.touches.length > 0) {
+        targetTiltX = (e.touches[0].clientX - width / 2) / (width / 2);
+        targetTiltY = (e.touches[0].clientY - height / 2) / (height / 2);
         addMouseTrailParticle(e.touches[0].clientX, e.touches[0].clientY);
+    }
+}, { passive: true });
+
+// Cảm biến nghiêng điện thoại (Gyroscope 3D Parallax trên Mobile)
+window.addEventListener("deviceorientation", (e) => {
+    if (e.gamma !== null && e.beta !== null) {
+        targetTiltX = Math.max(-1, Math.min(1, e.gamma / 28));
+        targetTiltY = Math.max(-1, Math.min(1, (e.beta - 40) / 28));
     }
 }, { passive: true });
 
@@ -2317,6 +2341,7 @@ function triggerHeartbeat(clientX, clientY) {
     addShockwave(center.x, center.y);
     createBurst(triggerX, triggerY, 45);
     spawnShootingStar();
+    triggerHaptic(25);
     if (audioCtx) {
         playChimeNote(880.00, 0, 1.0);
         playChimeNote(1174.66, 0.1, 1.2);
@@ -2334,10 +2359,23 @@ let lastTap = 0;
 canvas.addEventListener("touchend", (e) => {
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTap;
-    if (tapLength < 350 && tapLength > 0) openLoveLetter();
+    if (tapLength < 320 && tapLength > 0) {
+        // Chạm 2 lần (Double Tap) trên Mobile: Bắn pháo hoa rực rỡ
+        triggerHaptic([35, 50, 35]);
+        const changedTouch = e.changedTouches && e.changedTouches[0];
+        const tx = changedTouch ? changedTouch.clientX : width / 2;
+        const ty = changedTouch ? changedTouch.clientY : height / 3;
+        launchHeartFireworks(tx, ty);
+        setTimeout(() => launchHeartFireworks(), 260);
+        showToastCard("🎆 Pháo Hoa Trái Tim Bùng Nổ!", "Chạm đúp màn hình tạo nên ngàn vì sao sáng rực rỡ! ✨💖", 5000, "Pháo hoa trái tim bùng nổ! Chạm đúp màn hình tạo nên ngàn vì sao sáng rực rỡ!", "fireworks_story.mp3");
+    }
     lastTap = currentTime;
 });
-canvas.addEventListener("dblclick", () => openLoveLetter());
+canvas.addEventListener("dblclick", (e) => {
+    triggerHaptic([35, 50, 35]);
+    launchHeartFireworks(e.clientX, e.clientY);
+    setTimeout(() => launchHeartFireworks(), 260);
+});
 
 // ==========================================
 // 8.8 HỆ THỐNG HIỆU ỨNG KHÍ QUYỂN RIÊNG CHO 10 TÔNG MÀU (Theme Atmosphere)
@@ -3282,6 +3320,11 @@ function updateTourPosition() {
         cardTop = Math.min(winH - cardH - 16, targetRect.bottom + 24);
     }
 
+    const bottomNav = document.getElementById("mobileBottomBar");
+    const isBottomNavVisible = bottomNav && window.getComputedStyle(bottomNav).display !== "none";
+    const maxSafeBottom = isBottomNavVisible ? (winH - cardH - 74) : (winH - cardH - 16);
+    cardTop = Math.max(16, Math.min(maxSafeBottom, cardTop));
+
     tourCard.style.left = `${Math.round(cardLeft)}px`;
     tourCard.style.top = `${Math.round(cardTop)}px`;
 
@@ -3432,4 +3475,71 @@ window.addEventListener("resize", () => {
 setTimeout(() => {
     startTour();
 }, 350);
+
+// ==========================================
+// 12. MOBILE BOTTOM NAVIGATION DOCK CONTROLLER
+// ==========================================
+const mobShapeBtn = document.getElementById("mobShapeBtn");
+const mobThemeBtn = document.getElementById("mobThemeBtn");
+const mobFireworksBtn = document.getElementById("mobFireworksBtn");
+const mobLetterBtn = document.getElementById("mobLetterBtn");
+const mobHubBtn = document.getElementById("mobHubBtn");
+
+function updateMobileDockIcons() {
+    const mobShapeIcon = document.getElementById("mobShapeIcon");
+    const mobThemeIcon = document.getElementById("mobThemeIcon");
+    if (mobShapeIcon && curShape) mobShapeIcon.textContent = curShape.icon;
+    if (mobThemeIcon && curTheme) mobThemeIcon.textContent = curTheme.icon;
+}
+updateMobileDockIcons();
+
+if (mobShapeBtn) {
+    mobShapeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        triggerHaptic(30);
+        selectShape();
+        updateMobileDockIcons();
+    });
+}
+
+if (mobThemeBtn) {
+    mobThemeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        triggerHaptic(30);
+        selectTheme();
+        updateMobileDockIcons();
+    });
+}
+
+if (mobFireworksBtn) {
+    mobFireworksBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        triggerHaptic([40, 60, 40]);
+        launchHeartFireworks();
+        setTimeout(() => launchHeartFireworks(), 260);
+        setTimeout(() => launchHeartFireworks(), 520);
+        showToastCard("🎆 Bùng Nổ Pháo Hoa Trái Tim!", "Chúc cho tình cảm của hai bạn mãi rực rỡ và lấp lánh như ngàn vì sao! ✨💖", 6000, "Bùng nổ pháo hoa trái tim! Chúc cho tình cảm của hai bạn mãi rực rỡ và lấp lánh như ngàn vì sao!", "fireworks_story.mp3");
+    });
+}
+
+if (mobLetterBtn) {
+    mobLetterBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        triggerHaptic(35);
+        openLoveLetter();
+    });
+}
+
+if (mobHubBtn) {
+    mobHubBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        triggerHaptic(35);
+        if (controlHubModal && controlHubModal.classList.contains("open")) {
+            closeControlHub();
+        } else {
+            openControlHub();
+        }
+    });
+}
+
 

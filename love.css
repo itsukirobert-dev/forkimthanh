@@ -2647,60 +2647,24 @@ body.bg-mode-pure .bg-overlay {
     transform: scale(1.02);
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    .top-controls {
-        padding: 12px 12px;
-        gap: 8px;
-    }
+/* ==========================================
+   MOBILE BOTTOM NAVIGATION DOCK (Thanh Điều Khiển Di Động)
+   ========================================== */
+.mobile-bottom-bar {
+    display: none; /* Mặc định ẩn trên màn hình Desktop */
+}
 
-    .top-controls .left-cluster,
-    .top-controls .right-cluster {
-        gap: 6px;
+@keyframes centerIconGlow {
+    from {
+        filter: drop-shadow(0 0 2px #fff);
+        transform: scale(1);
     }
-
-    .glass-btn {
-        padding: 6px 10px;
-        font-size: 0.78rem;
-    }
-
-    .hint-label {
-        font-size: 1.05rem;
-    }
-
-    .hint-text {
-        bottom: 18px;
-        padding: 6px 14px;
-        width: 90%;
-        justify-content: center;
-    }
-
-    .letter-card {
-        padding: 28px 20px;
-    }
-
-    .letter-body p {
-        font-size: 1.25rem;
-    }
-
-    .cat-companion {
-        bottom: 18px;
-        right: 14px;
-        transform: scale(0.82);
-    }
-
-    .cat-companion:hover {
-        transform: scale(0.88) translateY(-2px);
-    }
-
-    .cat-bubble {
-        bottom: 85px;
-        right: 0px;
-        max-width: 170px;
-        font-size: 0.78rem;
-        padding: 8px 12px;
+    to {
+        filter: drop-shadow(0 0 10px #ff4081);
+        transform: scale(1.15) rotate(6deg);
     }
 }
+
 
 /* ==========================================
    COMPLETE STEP-BY-STEP GUIDED TOUR SYSTEM (HƯỚNG DẪN TỪ ĐẦU ĐẾN CUỐI)
@@ -2969,23 +2933,473 @@ body.bg-mode-pure .bg-overlay {
     transform: translateY(-1px);
 }
 
+/* ==========================================
+   MOBILE RESPONSIVE UI & TOUCH ENHANCEMENTS
+   ========================================== */
 @media (max-width: 768px) {
+    /* Touch optimization */
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body.love {
+        height: 100dvh; /* Dynamic viewport height cho trình duyệt mobile */
+    }
+
+    /* 1. Header & Top Controls */
+    .top-controls {
+        padding: max(10px, env(safe-area-inset-top, 10px)) 12px 6px;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .love-days-widget {
+        padding: 6px 12px;
+        gap: 6px;
+        font-size: 0.76rem;
+        max-width: calc(100% - 90px);
+        margin-right: 0;
+    }
+
+    .love-names-text {
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 110px;
+    }
+
+    .love-days-badge {
+        font-size: 0.7rem;
+        padding: 2px 7px;
+        white-space: nowrap;
+    }
+
+    /* Trên mobile ẩn 2 nút trùng lặp đã có ở Bottom Dock: Pháo hoa và Menu */
+    .hub-launcher-bar .fireworks-btn,
+    .hub-launcher-bar .hub-btn {
+        display: none !important;
+    }
+
+    .hub-launcher-bar {
+        gap: 6px;
+    }
+
+    .tour-guide-btn {
+        padding: 6px 10px;
+        font-size: 0.76rem;
+        border-radius: 20px;
+    }
+
+    .tour-guide-btn .btn-text {
+        display: none; /* Chỉ hiện icon 🧭 trên mobile để tiết kiệm diện tích */
+    }
+
+    .music-btn.mini {
+        padding: 6px 9px;
+    }
+
+    /* 2. Floating Mobile Bottom Dock */
+    .mobile-bottom-bar {
+        display: flex !important;
+        position: fixed;
+        bottom: max(12px, env(safe-area-inset-bottom, 12px));
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 24px);
+        max-width: 440px;
+        height: 60px;
+        background: linear-gradient(135deg, rgba(28, 12, 48, 0.9) 0%, rgba(48, 15, 68, 0.88) 100%);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1.5px solid rgba(255, 182, 193, 0.45);
+        border-radius: 30px;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.75), 0 0 25px rgba(255, 105, 180, 0.35), inset 0 0 12px rgba(255, 255, 255, 0.12);
+        justify-content: space-around;
+        align-items: center;
+        z-index: 1000;
+        padding: 0 4px;
+        pointer-events: auto;
+    }
+
+    .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        background: transparent;
+        border: none;
+        color: #ffd6e4;
+        font-family: 'Montserrat', sans-serif;
+        cursor: pointer;
+        padding: 5px 8px;
+        border-radius: 16px;
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        touch-action: manipulation;
+        outline: none;
+        flex: 1;
+    }
+
+    .mobile-nav-item:active {
+        transform: scale(0.92);
+        background: rgba(255, 105, 180, 0.22);
+    }
+
+    .mob-nav-icon {
+        font-size: 1.22rem;
+        line-height: 1;
+        transition: transform 0.2s ease;
+    }
+
+    .mob-nav-label {
+        font-size: 0.64rem;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+    }
+
+    .mob-action-center {
+        position: relative;
+        top: -12px;
+        flex: 1.1;
+    }
+
+    .mob-center-glow {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 64, 129, 0.6) 0%, transparent 70%);
+        animation: pulseDot 2s infinite;
+        pointer-events: none;
+    }
+
+    .mob-center-inner {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff4081 0%, #e040fb 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 6px 18px rgba(255, 64, 129, 0.7), 0 0 12px rgba(255, 215, 0, 0.6);
+        border: 2px solid #fff0f5;
+        transition: transform 0.2s ease;
+    }
+
+    .mob-action-center:active .mob-center-inner {
+        transform: scale(0.9);
+    }
+
+    .mob-center-icon {
+        font-size: 1.4rem;
+        animation: centerIconGlow 1.8s infinite alternate;
+    }
+
+    .mob-action-center .mob-nav-label {
+        color: #ffd700;
+        font-weight: 700;
+        text-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+        margin-top: 1px;
+    }
+
+    /* 3. Mascots (Mèo & Ngỗng) Positioning on Mobile */
+    .cat-squad {
+        bottom: 80px !important;
+        right: 8px !important;
+        gap: 6px !important;
+        transform: scale(0.7) !important;
+        transform-origin: bottom right !important;
+    }
+
+    .goose-squad {
+        bottom: 80px !important;
+        left: 8px !important;
+        gap: 4px !important;
+        transform: scale(0.7) !important;
+        transform-origin: bottom left !important;
+    }
+
+    .cat-bubble,
+    .goose-bubble {
+        bottom: 90px !important;
+        max-width: 150px !important;
+        font-size: 0.74rem !important;
+        padding: 7px 10px !important;
+        border-radius: 14px !important;
+    }
+
+    /* 4. Hint Text & Combo Badge on Mobile */
+    .hint-text {
+        bottom: 78px !important;
+        padding: 5px 14px !important;
+        width: auto !important;
+        max-width: 82% !important;
+        border-radius: 16px !important;
+    }
+
+    .hint-label {
+        font-size: 0.96rem !important;
+    }
+
+    .combo-badge {
+        bottom: 88px !important;
+        padding: 12px 18px 14px !important;
+        max-width: 92vw !important;
+        border-radius: 22px !important;
+    }
+
+    .combo-badge-title {
+        font-size: 1.4rem !important;
+    }
+
+    .combo-badge-quote {
+        font-size: 0.84rem !important;
+        line-height: 1.4 !important;
+    }
+
+    .combo-voice-btn {
+        padding: 5px 12px !important;
+        font-size: 0.76rem !important;
+    }
+
+    /* 5. Modals Responsive Layout on Mobile */
+    .control-hub-modal.open .control-hub-card {
+        width: 94vw !important;
+        max-width: 94vw !important;
+        max-height: 82vh !important;
+        padding: 18px 14px !important;
+        border-radius: 24px !important;
+    }
+
+    .hub-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+
+    .hub-title h3 {
+        font-size: 1.15rem !important;
+    }
+
+    .hub-subtitle {
+        font-size: 0.78rem !important;
+        margin-bottom: 12px !important;
+    }
+
+    .hub-item-btn {
+        padding: 8px 12px !important;
+    }
+
+    .hub-item-icon {
+        min-width: 36px !important;
+        height: 36px !important;
+        font-size: 1.25rem !important;
+    }
+
+    .hub-item-title {
+        font-size: 0.86rem !important;
+    }
+
+    .hub-item-desc {
+        font-size: 0.74rem !important;
+    }
+
+    .hub-chip {
+        padding: 4px 8px !important;
+        font-size: 0.72rem !important;
+    }
+
+    .letter-card {
+        width: 92vw !important;
+        max-width: 92vw !important;
+        max-height: 84vh !important;
+        overflow-y: auto !important;
+        padding: 24px 16px 20px !important;
+        border-radius: 22px !important;
+    }
+
+    .letter-stamp {
+        font-size: 2.2rem !important;
+    }
+
+    .letter-header h2 {
+        font-size: 1.6rem !important;
+    }
+
+    .letter-body p {
+        font-size: 1.2rem !important;
+        line-height: 1.6 !important;
+    }
+
+    .letter-signature {
+        font-size: 1.3rem !important;
+    }
+
+    .author-card {
+        width: 92vw !important;
+        max-width: 92vw !important;
+        max-height: 84vh !important;
+        overflow-y: auto !important;
+        padding: 24px 16px 20px !important;
+        border-radius: 22px !important;
+    }
+
+    .author-photo {
+        width: 85px !important;
+        height: 85px !important;
+    }
+
+    .author-name {
+        font-size: 1.35rem !important;
+    }
+
+    .author-role {
+        font-size: 0.78rem !important;
+    }
+
+    .author-quote p {
+        font-size: 0.92rem !important;
+    }
+
+    .author-tags {
+        gap: 5px !important;
+    }
+
+    .author-tag {
+        font-size: 0.74rem !important;
+        padding: 4px 9px !important;
+    }
+
+    .music-card {
+        width: 94vw !important;
+        max-width: 94vw !important;
+        max-height: 84vh !important;
+        overflow-y: auto !important;
+        padding: 20px 14px 18px !important;
+        border-radius: 22px !important;
+    }
+
+    .music-modal-header h2 {
+        font-size: 1.25rem !important;
+    }
+
+    .genre-tabs {
+        gap: 6px !important;
+    }
+
+    .genre-tab-btn {
+        padding: 8px 10px !important;
+        font-size: 0.78rem !important;
+        flex: 1 !important;
+    }
+
+    .song-item {
+        padding: 8px 10px !important;
+        min-height: 46px !important;
+    }
+
+    .song-title {
+        font-size: 0.82rem !important;
+    }
+
+    .song-artist {
+        font-size: 0.7rem !important;
+    }
+
+    .upload-music-btn {
+        padding: 8px 14px !important;
+        font-size: 0.76rem !important;
+    }
+
+    .name-editor-card {
+        width: 94vw !important;
+        max-width: 94vw !important;
+        max-height: 86vh !important;
+        overflow-y: auto !important;
+        padding: 22px 14px 18px !important;
+        border-radius: 22px !important;
+    }
+
+    .name-editor-form input,
+    .name-editor-form textarea {
+        font-size: 16px !important; /* Ngăn chặn iOS Safari tự động phóng to */
+        padding: 9px 12px !important;
+        border-radius: 12px !important;
+    }
+
+    .save-settings-btn {
+        padding: 11px 16px !important;
+        font-size: 0.9rem !important;
+        min-height: 46px !important;
+    }
+
+    /* 6. Tour Guide Responsive */
     .tour-card {
-        width: 90vw;
-        padding: 18px 18px 16px;
+        width: min(350px, 92vw) !important;
+        padding: 16px 16px 14px !important;
+        border-radius: 20px !important;
     }
 
     .tour-title {
-        font-size: 1.02rem;
+        font-size: 0.98rem !important;
+        margin-bottom: 6px !important;
     }
 
     .tour-desc {
-        font-size: 0.82rem;
-        margin-bottom: 14px;
+        font-size: 0.8rem !important;
+        line-height: 1.45 !important;
+        margin-bottom: 12px !important;
+    }
+
+    .tour-actions {
+        gap: 6px !important;
     }
 
     .tour-btn {
-        padding: 7px 13px;
-        font-size: 0.78rem;
+        padding: 6px 12px !important;
+        font-size: 0.76rem !important;
     }
 }
+
+/* Extra small mobile devices (<= 380px) */
+@media (max-width: 380px) {
+    .love-names-text {
+        max-width: 80px;
+    }
+
+    .mobile-bottom-bar {
+        height: 56px;
+        width: calc(100% - 16px);
+    }
+
+    .mob-nav-icon {
+        font-size: 1.1rem;
+    }
+
+    .mob-nav-label {
+        font-size: 0.58rem;
+    }
+
+    .mob-action-center {
+        top: -10px;
+    }
+
+    .mob-center-inner {
+        width: 42px;
+        height: 42px;
+    }
+
+    .mob-center-icon {
+        font-size: 1.25rem;
+    }
+
+    .cat-squad,
+    .goose-squad {
+        transform: scale(0.6) !important;
+    }
+}
