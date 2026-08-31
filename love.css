@@ -1,0 +1,2991 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body.love {
+    width: 100%;
+    height: 100vh;
+    background-color: #030308;
+    overflow: hidden;
+    touch-action: none;
+    font-family: 'Montserrat', sans-serif;
+    perspective: 1000px;
+}
+
+.love .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.love .container .content {
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+}
+
+/* Background & 3D Parallax Layer */
+.love .container .content .background {
+    position: absolute;
+    top: -5%;
+    left: -5%;
+    width: 110%;
+    height: 110%;
+    z-index: 1;
+    transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: transform;
+}
+
+.love .container .content .background .hinh {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    filter: brightness(0.88) contrast(1.05) saturate(1.12);
+    transition: filter 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(10, 5, 20, 0.15) 0%, rgba(2, 2, 6, 0.85) 100%);
+    pointer-events: none;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Chế độ 2: Ngắm Nền Nghệ Thuật (Nền sáng nét, tim mờ hòa quyện) */
+body.bg-mode-art .background .hinh {
+    filter: brightness(0.92) contrast(1.08) saturate(1.15) !important;
+}
+
+body.bg-mode-art .bg-overlay {
+    opacity: 0.28 !important;
+}
+
+/* Chế độ 3: Nền Thiên Hà 3D (Vũ trụ xoay 3D sâu thẳm huyền ảo) */
+body.bg-mode-galaxy .background .hinh {
+    filter: brightness(0.38) contrast(1.3) hue-rotate(250deg) saturate(1.9) !important;
+}
+
+body.bg-mode-galaxy .bg-overlay {
+    opacity: 0.55 !important;
+    background: radial-gradient(circle at center, rgba(30, 8, 65, 0.4) 0%, rgba(3, 0, 15, 0.92) 100%) !important;
+}
+
+/* Chế độ 4: Ngắm Nền Thuần Khiết (Nền sáng 100%, ẩn tim để chiêm ngưỡng trọn vẹn) */
+body.bg-mode-pure .background .hinh {
+    filter: brightness(1.05) contrast(1.05) saturate(1.22) !important;
+}
+
+body.bg-mode-pure .bg-overlay {
+    opacity: 0.0 !important;
+}
+
+/* Canvas Layer */
+.love .container .content .love-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#heartCanvas {
+    display: block;
+    cursor: pointer;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform;
+}
+
+/* Top Action Controls (Glassmorphism Buttons) */
+/* Top Action Controls (Gọn Gàng 1 Nút Menu Tiện Ích) */
+.top-controls {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 20;
+    pointer-events: none;
+}
+
+.hub-launcher-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: auto;
+}
+
+.hub-btn {
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.28), rgba(168, 85, 247, 0.28));
+    border: 1.5px solid rgba(255, 200, 220, 0.5);
+    box-shadow: 0 4px 20px rgba(255, 105, 180, 0.35), inset 0 0 12px rgba(255, 255, 255, 0.15);
+    font-weight: 600;
+}
+
+.hub-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.45), rgba(168, 85, 247, 0.45));
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 6px 28px rgba(255, 105, 180, 0.6);
+    transform: translateY(-2px) scale(1.05);
+}
+
+.hub-icon-glow {
+    font-size: 1.15rem;
+    animation: hubIconGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes hubIconGlow {
+    from {
+        filter: drop-shadow(0 0 2px #fff);
+        transform: scale(1);
+    }
+
+    to {
+        filter: drop-shadow(0 0 8px #ff69b4);
+        transform: scale(1.15);
+    }
+}
+
+.hub-badge-dot {
+    width: 7px;
+    height: 7px;
+    background: #4cd137;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #4cd137;
+    margin-left: 2px;
+    animation: pulseDot 1.8s infinite;
+}
+
+@keyframes pulseDot {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+
+    50% {
+        transform: scale(1.4);
+        opacity: 1;
+    }
+}
+
+.glass-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(255, 105, 180, 0.15);
+    border: 1px solid rgba(255, 182, 193, 0.35);
+    border-radius: 30px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: #ffd1dc;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.glass-btn.mini {
+    padding: 8px 12px;
+}
+
+/* ==========================================
+   LOVE DAYS COUNTER WIDGET (Đồng Hồ Đếm Ngày Yêu)
+   ========================================== */
+.love-days-widget {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.22), rgba(168, 85, 247, 0.25));
+    border: 1.5px solid rgba(255, 182, 193, 0.55);
+    border-radius: 30px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 6px 25px rgba(255, 105, 180, 0.35), inset 0 0 12px rgba(255, 255, 255, 0.15);
+    color: #fff;
+    cursor: pointer;
+    pointer-events: auto;
+    font-size: 0.84rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    user-select: none;
+    margin-right: auto;
+}
+
+.love-days-widget:hover {
+    transform: translateY(-2px) scale(1.04);
+    border-color: #ffd700;
+    box-shadow: 0 8px 30px rgba(255, 105, 180, 0.55), 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.love-days-widget .heart-pulse-icon {
+    font-size: 1.1rem;
+    animation: heartBeat 1.4s infinite ease-in-out;
+}
+
+.love-names-text {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+.love-days-badge {
+    background: rgba(255, 255, 255, 0.18);
+    padding: 3px 9px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffe4f0;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+/* Fireworks Button */
+.fireworks-btn {
+    background: linear-gradient(135deg, rgba(255, 87, 34, 0.28), rgba(233, 30, 99, 0.28));
+    border-color: rgba(255, 171, 145, 0.6);
+}
+
+.fireworks-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 87, 34, 0.5), rgba(233, 30, 99, 0.5));
+    border-color: #ffd700;
+    box-shadow: 0 6px 25px rgba(255, 87, 34, 0.6), 0 0 20px rgba(255, 215, 0, 0.5);
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* Form Styles for Name Editor Modal */
+.name-editor-card {
+    max-width: 520px;
+    text-align: left;
+}
+
+.name-editor-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.name-editor-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.name-editor-form label {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #ffd1dc;
+}
+
+.name-editor-form input,
+.name-editor-form textarea {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 182, 193, 0.35);
+    border-radius: 14px;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.88rem;
+    outline: none;
+    transition: all 0.25s ease;
+}
+
+.name-editor-form input:focus,
+.name-editor-form textarea:focus {
+    border-color: #ff69b4;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 15px rgba(255, 105, 180, 0.4);
+}
+
+.save-settings-btn {
+    margin-top: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #ff4081 0%, #e040fb 100%);
+    border: none;
+    border-radius: 20px;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 25px rgba(255, 64, 129, 0.45);
+}
+
+.save-settings-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(255, 64, 129, 0.6);
+}
+
+.glass-btn:hover {
+    background: rgba(255, 105, 180, 0.3);
+    border-color: rgba(255, 200, 220, 0.6);
+    box-shadow: 0 6px 25px rgba(255, 105, 180, 0.45);
+    transform: translateY(-2px) scale(1.04);
+}
+
+.glass-btn:active {
+    transform: translateY(0) scale(0.97);
+}
+
+/* ==========================================
+   FLOATING GLASS CONTROL HUB MODAL
+   ========================================== */
+.control-hub-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.control-hub-modal.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.control-hub-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(8, 4, 18, 0.4);
+}
+
+.control-hub-card {
+    position: relative;
+    z-index: 10;
+    width: 92%;
+    max-width: 580px;
+    max-height: 88vh;
+    overflow-y: auto;
+    background: linear-gradient(135deg, rgba(26, 10, 42, 0.92), rgba(46, 12, 62, 0.88));
+    border: 1.5px solid rgba(255, 182, 193, 0.45);
+    border-radius: 28px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 40px rgba(255, 105, 180, 0.35), inset 0 0 20px rgba(255, 255, 255, 0.1);
+    padding: 24px 28px;
+    transform: scale(0.92) translateY(20px);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.control-hub-modal.open .control-hub-card {
+    transform: scale(1) translateY(0);
+}
+
+.hub-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.hub-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hub-header-icon {
+    font-size: 1.5rem;
+}
+
+.hub-title h3 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    background: linear-gradient(135deg, #fff, #ffd1dc, #ff9bb2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hub-subtitle {
+    margin: 0 0 16px 0;
+    font-size: 0.85rem;
+    color: rgba(255, 209, 220, 0.85);
+}
+
+.close-hub-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 1.4rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.close-hub-btn:hover {
+    background: rgba(255, 75, 120, 0.4);
+    transform: rotate(90deg) scale(1.1);
+}
+
+.hub-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+.hub-item-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 182, 193, 0.2);
+    border-radius: 20px;
+    padding: 8px;
+    transition: all 0.25s ease;
+}
+
+.hub-item-group.single {
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+.hub-item-group:hover {
+    border-color: rgba(255, 182, 193, 0.45);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.hub-item-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 182, 193, 0.25);
+    border-radius: 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    color: inherit;
+    outline: none;
+    width: 100%;
+}
+
+.hub-item-group .hub-item-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 182, 193, 0.15);
+}
+
+.hub-chips-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 2px 2px 4px;
+}
+
+.hub-chip {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 182, 193, 0.22);
+    color: #ffd8eb;
+    border-radius: 12px;
+    padding: 4px 9px;
+    font-size: 0.74rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    outline: none;
+    user-select: none;
+}
+
+.hub-chip:hover {
+    background: rgba(255, 105, 180, 0.35);
+    border-color: rgba(255, 200, 220, 0.8);
+    color: #ffffff;
+    transform: translateY(-1px) scale(1.04);
+    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+}
+
+.hub-chip.active {
+    background: linear-gradient(135deg, #ff4081 0%, #e040fb 100%);
+    border-color: #ffd700;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 0 12px rgba(255, 64, 129, 0.6);
+}
+
+.hub-item-btn:hover {
+    background: rgba(255, 105, 180, 0.25);
+    border-color: rgba(255, 200, 220, 0.65);
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 6px 20px rgba(255, 105, 180, 0.3);
+}
+
+.hub-item-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.hub-item-icon {
+    font-size: 1.5rem;
+    min-width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hub-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.hub-item-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.hub-item-desc {
+    font-size: 0.78rem;
+    color: #ffb6c1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Vinyl Disc & Waveform */
+.disc-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    color: #ff69b4;
+    transition: transform 0.3s ease;
+}
+
+.music-btn.playing .disc-icon {
+    animation: spinDisc 3.5s linear infinite;
+    color: #ff85c0;
+    filter: drop-shadow(0 0 6px rgba(255, 105, 180, 0.8));
+}
+
+@keyframes spinDisc {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.music-waves {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 14px;
+}
+
+.music-waves span {
+    width: 3px;
+    height: 4px;
+    background: #ffb6c1;
+    border-radius: 2px;
+    transition: height 0.2s ease;
+}
+
+.music-btn.playing .music-waves span {
+    animation: waveBounce 1.2s ease-in-out infinite alternate;
+}
+
+.music-btn.playing .music-waves span:nth-child(1) {
+    animation-delay: 0.0s;
+}
+
+.music-btn.playing .music-waves span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.music-btn.playing .music-waves span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.music-btn.playing .music-waves span:nth-child(4) {
+    animation-delay: 0.1s;
+}
+
+@keyframes waveBounce {
+    0% {
+        height: 4px;
+    }
+
+    50% {
+        height: 14px;
+        background: #ff69b4;
+    }
+
+    100% {
+        height: 6px;
+    }
+}
+
+/* Combo Click / Notification Toast Badge / Thẻ Kể Chuyện Thính Hoàng Gia */
+.combo-badge {
+    position: absolute;
+    bottom: 95px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px) scale(0.92);
+    pointer-events: auto !important;
+    z-index: 99990;
+    font-family: 'Montserrat', sans-serif;
+    color: #fff5f8;
+    background: linear-gradient(135deg, rgba(25, 12, 45, 0.96) 0%, rgba(55, 18, 78, 0.94) 100%);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1.8px solid rgba(255, 192, 203, 0.85);
+    border-radius: 28px;
+    padding: 16px 28px 18px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.85), 0 0 40px rgba(255, 105, 180, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.35s;
+    max-width: min(640px, 94vw);
+    text-align: center;
+    line-height: 1.5;
+    user-select: none;
+}
+
+.combo-badge.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.combo-badge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.combo-badge-title {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: #ffd700;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.95), 0 0 28px rgba(255, 105, 180, 0.8);
+    display: block;
+    margin: 0 auto;
+}
+
+.combo-badge-quote {
+    font-size: 0.98rem;
+    font-weight: 400;
+    color: #ffe4e6;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+    display: block;
+    line-height: 1.55;
+    font-style: italic;
+    margin-top: 4px;
+}
+
+.combo-badge-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.combo-voice-btn {
+    background: linear-gradient(135deg, #ff4081, #e040fb);
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 64, 129, 0.5);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.combo-voice-btn:hover {
+    transform: scale(1.06);
+    box-shadow: 0 6px 20px rgba(255, 64, 129, 0.7);
+}
+
+.combo-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffccd5;
+    font-size: 1.1rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.combo-close-btn:hover {
+    background: rgba(255, 75, 120, 0.6);
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+/* Hint Text at Bottom */
+.hint-text {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    background: rgba(10, 5, 20, 0.4);
+    border: 1px solid rgba(255, 182, 193, 0.2);
+    border-radius: 20px;
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+    animation: pulseHint 3s ease-in-out infinite;
+}
+
+.hint-label {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffd8eb;
+    text-shadow: 0 0 10px rgba(255, 105, 180, 0.8);
+    letter-spacing: 0.5px;
+}
+
+.hint-icon {
+    font-size: 1rem;
+    animation: sparkleGlow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulseHint {
+
+    0%,
+    100% {
+        opacity: 0.75;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-4px);
+    }
+}
+
+@keyframes sparkleGlow {
+    from {
+        transform: scale(0.9);
+        opacity: 0.6;
+    }
+
+    to {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+}
+
+/* Secret Love Letter Modal */
+.letter-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(3, 3, 10, 0.4);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.letter-modal.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.letter-card {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    background: linear-gradient(135deg, rgba(35, 20, 45, 0.94) 0%, rgba(18, 10, 28, 0.96) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(255, 182, 193, 0.45);
+    border-radius: 24px;
+    padding: 36px 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75), 0 0 30px rgba(255, 105, 180, 0.35);
+    text-align: center;
+    transform: scale(0.85) translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.letter-modal.open .letter-card {
+    transform: scale(1) translateY(0);
+}
+
+.close-letter-btn {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    background: transparent;
+    border: none;
+    color: #ffb6c1;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.close-letter-btn:hover {
+    color: #fff;
+    transform: rotate(90deg) scale(1.15);
+}
+
+.letter-header {
+    margin-bottom: 20px;
+}
+
+.letter-stamp {
+    font-size: 2.6rem;
+    display: inline-block;
+    filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.8));
+    animation: stampPulse 2s ease-in-out infinite;
+}
+
+@keyframes stampPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.letter-header h2 {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2rem;
+    color: #ffd1dc;
+    text-shadow: 0 0 12px rgba(255, 105, 180, 0.7);
+    margin-top: 8px;
+}
+
+.letter-body {
+    min-height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 15px 0;
+}
+
+.letter-body p {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.45rem;
+    line-height: 1.8;
+    color: #fff;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    white-space: pre-line;
+}
+
+.letter-footer {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed rgba(255, 182, 193, 0.25);
+}
+
+.letter-signature {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ff69b4;
+    text-shadow: 0 0 10px rgba(255, 105, 180, 0.8);
+}
+
+/* ==========================================
+   CUTE INTERACTIVE CAT SQUAD (Hội Bé Mèo Đa Sắc)
+   ========================================== */
+.cat-squad {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999 !important;
+    display: flex !important;
+    align-items: flex-end;
+    gap: 14px;
+    user-select: none;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+.cat-companion {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    pointer-events: auto;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+
+.cat-companion:hover {
+    transform: scale(1.15) translateY(-6px);
+    filter: brightness(1.08);
+}
+
+.cat-companion.jump {
+    animation: catJump 0.6s ease forwards;
+}
+
+@keyframes catJump {
+    0% {
+        transform: scale(1) translateY(0);
+    }
+
+    30% {
+        transform: scale(1.18, 0.85) translateY(-25px);
+    }
+
+    60% {
+        transform: scale(0.92, 1.1) translateY(-35px);
+    }
+
+    80% {
+        transform: scale(1.05, 0.95) translateY(-5px);
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Cat Speech Bubble */
+.cat-bubble {
+    position: absolute;
+    bottom: 95px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px) scale(0.9);
+    width: max-content;
+    max-width: 220px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 2px solid rgba(255, 182, 193, 0.8);
+    border-radius: 18px;
+    border-bottom-right-radius: 4px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #ff4081;
+    box-shadow: 0 8px 25px rgba(255, 105, 180, 0.35), 0 0 15px rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 20;
+    text-align: center;
+}
+
+.cat-bubble.active {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+
+/* Cat Character Geometry & Dancing */
+.cat-wrapper {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    filter: drop-shadow(0 8px 18px rgba(255, 105, 180, 0.45));
+    transform-origin: bottom center;
+}
+
+/* ==========================================
+   4 PHONG CÁCH VŨ ĐẠO ĐỈNH CAO CHO 4 BÉ MÈO
+   ========================================== */
+
+/* 1. Mèo Trắng: Nhảy Giang 2 Tay Bập Bùng (Chuẩn TikTok Như Trong Hình) */
+.cat-white .cat-wrapper {
+    animation: tiktokDanceT2 0.68s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+.cat-white .cat-head {
+    animation: tiktokHeadTilt 0.68s ease-in-out infinite alternate;
+}
+
+.cat-white .cat-paw-left {
+    top: 4px;
+    left: -12px;
+    width: 16px;
+    height: 9px;
+    border-radius: 12px;
+    transform-origin: right center;
+    animation: tiktokArmWaveL 0.68s ease-in-out infinite alternate;
+}
+
+.cat-white .cat-paw-right {
+    top: 4px;
+    right: -12px;
+    width: 16px;
+    height: 9px;
+    border-radius: 12px;
+    transform-origin: left center;
+    animation: tiktokArmWaveR 0.68s ease-in-out infinite alternate;
+}
+
+@keyframes tiktokDanceT2 {
+    0% {
+        transform: translateY(0) rotate(-14deg) scale(1.06, 0.92);
+    }
+
+    50% {
+        transform: translateY(-16px) rotate(0deg) scale(0.95, 1.08);
+    }
+
+    100% {
+        transform: translateY(-4px) rotate(14deg) scale(1.06, 0.92);
+    }
+}
+
+@keyframes tiktokHeadTilt {
+    0% {
+        transform: rotate(-10deg);
+    }
+
+    100% {
+        transform: rotate(10deg);
+    }
+}
+
+@keyframes tiktokArmWaveL {
+    0% {
+        transform: rotate(-35deg) translateY(-2px);
+    }
+
+    50% {
+        transform: rotate(-8deg) translateY(4px);
+    }
+
+    100% {
+        transform: rotate(-48deg) translateY(-5px);
+    }
+}
+
+@keyframes tiktokArmWaveR {
+    0% {
+        transform: rotate(48deg) translateY(-5px);
+    }
+
+    50% {
+        transform: rotate(8deg) translateY(4px);
+    }
+
+    100% {
+        transform: rotate(35deg) translateY(-2px);
+    }
+}
+
+/* 2. Mèo Vàng Cam: Nhảy Vinahouse Quẩy Bass & Múa Quạt Khá Bảnh */
+.cat-ginger .cat-wrapper {
+    animation: vinahouseBassPump 0.36s ease-in-out infinite alternate;
+}
+
+.cat-ginger .cat-head {
+    animation: vinahouseHeadBob 0.36s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite alternate;
+}
+
+.cat-ginger .cat-paw-left {
+    top: 0px;
+    left: 0px;
+    width: 14px;
+    height: 9px;
+    border-radius: 50%;
+    transform-origin: center center;
+    animation: muaQuatVinahouseL 0.45s linear infinite;
+}
+
+.cat-ginger .cat-paw-right {
+    top: 0px;
+    right: 0px;
+    width: 14px;
+    height: 9px;
+    border-radius: 50%;
+    transform-origin: center center;
+    animation: muaQuatVinahouseR 0.45s linear infinite 0.22s;
+}
+
+@keyframes vinahouseBassPump {
+    0% {
+        transform: translateY(0) scale(1.15, 0.84) rotate(-4deg);
+    }
+
+    100% {
+        transform: translateY(-28px) scale(0.88, 1.18) rotate(5deg);
+    }
+}
+
+@keyframes vinahouseHeadBob {
+    0% {
+        transform: translateY(0) scale(1, 0.94);
+    }
+
+    100% {
+        transform: translateY(-8px) scale(0.96, 1.06);
+    }
+}
+
+@keyframes muaQuatVinahouseL {
+    0% {
+        transform: rotate(0deg) translate(-4px, -4px);
+    }
+
+    25% {
+        transform: rotate(90deg) translate(-2px, -9px);
+    }
+
+    50% {
+        transform: rotate(180deg) translate(4px, -4px);
+    }
+
+    75% {
+        transform: rotate(270deg) translate(0px, 2px);
+    }
+
+    100% {
+        transform: rotate(360deg) translate(-4px, -4px);
+    }
+}
+
+@keyframes muaQuatVinahouseR {
+    0% {
+        transform: rotate(360deg) translate(4px, -4px);
+    }
+
+    25% {
+        transform: rotate(270deg) translate(2px, -9px);
+    }
+
+    50% {
+        transform: rotate(180deg) translate(-4px, -4px);
+    }
+
+    75% {
+        transform: rotate(90deg) translate(0px, 2px);
+    }
+
+    100% {
+        transform: rotate(0deg) translate(4px, -4px);
+    }
+}
+
+/* 3. Mèo Đen: Che Miệng Cười E Thẹn & Vẫy Tay Chào */
+.cat-black .cat-body {
+    z-index: 5 !important;
+}
+
+.cat-black .cat-wrapper {
+    animation: shyBodySway 1.05s ease-in-out infinite alternate;
+}
+
+.cat-black .cat-head {
+    animation: shyHeadTilt 1.05s ease-in-out infinite alternate;
+}
+
+/* Tay trái đưa lên che chính xác trước miệng */
+.cat-black .cat-paw-left {
+    top: -7px;
+    left: 12px;
+    width: 14px;
+    height: 11px;
+    z-index: 10;
+    border-radius: 50% 50% 40% 40%;
+    transform-origin: bottom center;
+    animation: coverMouthGiggle 0.45s ease-in-out infinite alternate;
+}
+
+/* Tay phải giơ cao vẫy chào */
+.cat-black .cat-paw-right {
+    top: -12px;
+    right: -7px;
+    width: 14px;
+    height: 11px;
+    z-index: 10;
+    border-radius: 50%;
+    transform-origin: bottom left;
+    animation: waveHandHello 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes shyBodySway {
+    0% {
+        transform: translateY(0) rotate(-6deg) scale(1.02, 0.95);
+    }
+
+    100% {
+        transform: translateY(-16px) rotate(8deg) scale(0.96, 1.05);
+    }
+}
+
+@keyframes shyHeadTilt {
+    0% {
+        transform: rotate(-6deg);
+    }
+
+    100% {
+        transform: rotate(8deg);
+    }
+}
+
+@keyframes coverMouthGiggle {
+    0% {
+        transform: rotate(-6deg) translateY(0) scale(1);
+    }
+
+    100% {
+        transform: rotate(8deg) translateY(-3px) scale(1.1);
+    }
+}
+
+@keyframes waveHandHello {
+    0% {
+        transform: rotate(10deg) translateY(0);
+    }
+
+    50% {
+        transform: rotate(55deg) translateY(-6px);
+    }
+
+    100% {
+        transform: rotate(15deg) translateY(-2px);
+    }
+}
+
+/* 4. Mèo Hồng: Nhảy Hip-Hop Popping / Breakdance Đẳng Cấp */
+.cat-pink .cat-wrapper {
+    animation: hiphopPoppingBeat 0.72s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite alternate;
+}
+
+.cat-pink .cat-head {
+    animation: hiphopHeadSnap 0.72s steps(2, jump-none) infinite;
+}
+
+.cat-pink .cat-paw-left {
+    top: 3px;
+    left: -5px;
+    width: 14px;
+    height: 9px;
+    border-radius: 50%;
+    animation: hiphopArmSnapL 0.72s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite alternate;
+}
+
+.cat-pink .cat-paw-right {
+    top: 3px;
+    right: -5px;
+    width: 14px;
+    height: 9px;
+    border-radius: 50%;
+    animation: hiphopArmSnapR 0.72s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite alternate 0.36s;
+}
+
+@keyframes hiphopPoppingBeat {
+    0% {
+        transform: translateY(0) rotate(-12deg) scale(1.12, 0.86);
+    }
+
+    30% {
+        transform: translateY(-28px) rotate(14deg) scale(0.9, 1.16);
+    }
+
+    60% {
+        transform: translateY(-10px) rotate(-8deg) scale(1.08, 0.92);
+    }
+
+    100% {
+        transform: translateY(-36px) rotate(12deg) scale(0.94, 1.1);
+    }
+}
+
+@keyframes hiphopHeadSnap {
+
+    0%,
+    45% {
+        transform: rotate(-10deg) scale(1.05);
+    }
+
+    50%,
+    95% {
+        transform: rotate(12deg) scale(0.95);
+    }
+
+    100% {
+        transform: rotate(-10deg) scale(1.05);
+    }
+}
+
+@keyframes hiphopArmSnapL {
+    0% {
+        transform: rotate(-40deg) translateY(0);
+    }
+
+    50% {
+        transform: rotate(25deg) translateY(-9px);
+    }
+
+    100% {
+        transform: rotate(-50deg) translateY(-5px);
+    }
+}
+
+@keyframes hiphopArmSnapR {
+    0% {
+        transform: rotate(50deg) translateY(-5px);
+    }
+
+    50% {
+        transform: rotate(-25deg) translateY(-9px);
+    }
+
+    100% {
+        transform: rotate(40deg) translateY(0);
+    }
+}
+
+/* Nhảy Siêu Cao Khi Được Bấm Hoặc Nói */
+.cat-companion.jump .cat-wrapper {
+    animation: catMegaJump 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+}
+
+@keyframes catMegaJump {
+    0% {
+        transform: translateY(0) scale(1.1, 0.9) rotate(0deg);
+    }
+
+    30% {
+        transform: translateY(-50px) scale(0.9, 1.2) rotate(-15deg);
+    }
+
+    60% {
+        transform: translateY(-70px) scale(1.15, 0.85) rotate(15deg);
+    }
+
+    80% {
+        transform: translateY(-25px) scale(0.95, 1.05) rotate(-5deg);
+    }
+
+    100% {
+        transform: translateY(0) scale(1, 1) rotate(0deg);
+    }
+}
+
+/* Halo */
+.cat-halo {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.05rem;
+    animation: haloTwinkle 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes haloTwinkle {
+    0% {
+        opacity: 0.6;
+        transform: translateX(-50%) scale(0.9);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2);
+    }
+}
+
+/* Head */
+.cat-head {
+    position: absolute;
+    top: 5px;
+    left: 8px;
+    width: 52px;
+    height: 44px;
+    background: linear-gradient(145deg, #ffffff 0%, #fff0f5 100%);
+    border: 2px solid #ffccd5;
+    border-radius: 50% 50% 45% 45%;
+    z-index: 3;
+}
+
+/* Ears */
+.cat-ear {
+    position: absolute;
+    top: -2px;
+    width: 18px;
+    height: 22px;
+    background: #ffffff;
+    border: 2px solid #ffccd5;
+    border-radius: 50% 50% 0 0;
+    z-index: 2;
+    transform-origin: bottom center;
+}
+
+.cat-ear::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 3px;
+    width: 9px;
+    height: 11px;
+    background: #ffb6c1;
+    border-radius: 50% 50% 0 0;
+}
+
+.cat-ear-left {
+    left: 8px;
+    transform: rotate(-25deg);
+    animation: earTwitchL 4s ease-in-out infinite;
+}
+
+.cat-ear-right {
+    right: 8px;
+    transform: rotate(25deg);
+    animation: earTwitchR 4s ease-in-out infinite 0.5s;
+}
+
+@keyframes earTwitchL {
+
+    0%,
+    90%,
+    100% {
+        transform: rotate(-25deg);
+    }
+
+    93% {
+        transform: rotate(-35deg);
+    }
+
+    96% {
+        transform: rotate(-20deg);
+    }
+}
+
+@keyframes earTwitchR {
+
+    0%,
+    90%,
+    100% {
+        transform: rotate(25deg);
+    }
+
+    93% {
+        transform: rotate(35deg);
+    }
+
+    96% {
+        transform: rotate(20deg);
+    }
+}
+
+/* Eyes */
+.cat-eye {
+    position: absolute;
+    top: 15px;
+    width: 10px;
+    height: 11px;
+    background: #4a2818;
+    border-radius: 50%;
+    overflow: hidden;
+    animation: catBlink 4.5s infinite;
+}
+
+.cat-eye-left {
+    left: 10px;
+}
+
+.cat-eye-right {
+    right: 10px;
+}
+
+.cat-sparkle {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 3.5px;
+    height: 3.5px;
+    background: #ffffff;
+    border-radius: 50%;
+}
+
+@keyframes catBlink {
+
+    0%,
+    94%,
+    98%,
+    100% {
+        transform: scaleY(1);
+    }
+
+    96% {
+        transform: scaleY(0.08);
+    }
+}
+
+/* Blush */
+.cat-blush {
+    position: absolute;
+    top: 23px;
+    width: 9px;
+    height: 5px;
+    background: rgba(255, 105, 180, 0.45);
+    border-radius: 50%;
+}
+
+.cat-blush-left {
+    left: 5px;
+}
+
+.cat-blush-right {
+    right: 5px;
+}
+
+/* Nose & Mouth */
+.cat-nose {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 4px;
+    background: #ff69b4;
+    border-radius: 50% 50% 60% 60%;
+}
+
+.cat-mouth {
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 9px;
+    height: 5px;
+    border-bottom: 2px solid #ff69b4;
+    border-radius: 0 0 50% 50%;
+}
+
+/* Whiskers */
+.cat-whisker {
+    position: absolute;
+    height: 1.5px;
+    background: rgba(255, 150, 180, 0.8);
+    border-radius: 2px;
+}
+
+.cat-whisker-l1 {
+    top: 23px;
+    left: -4px;
+    width: 11px;
+    transform: rotate(-8deg);
+}
+
+.cat-whisker-l2 {
+    top: 27px;
+    left: -3px;
+    width: 10px;
+    transform: rotate(10deg);
+}
+
+.cat-whisker-r1 {
+    top: 23px;
+    right: -4px;
+    width: 11px;
+    transform: rotate(8deg);
+}
+
+.cat-whisker-r2 {
+    top: 27px;
+    right: -3px;
+    width: 10px;
+    transform: rotate(-10deg);
+}
+
+/* Body */
+.cat-body {
+    position: absolute;
+    bottom: 2px;
+    left: 15px;
+    width: 38px;
+    height: 30px;
+    background: linear-gradient(145deg, #ffffff 0%, #ffeef2 100%);
+    border: 2px solid #ffccd5;
+    border-radius: 40% 40% 50% 50%;
+    z-index: 2;
+}
+
+.cat-collar {
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 25px;
+    height: 5.5px;
+    background: #ff4081;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cat-bell {
+    font-size: 0.6rem;
+    position: relative;
+    top: 1px;
+}
+
+.cat-paw {
+    position: absolute;
+    bottom: -3px;
+    width: 11px;
+    height: 8px;
+    background: #ffffff;
+    border: 2px solid #ffccd5;
+    border-radius: 50%;
+}
+
+.cat-paw-left {
+    left: 4px;
+    animation: pawStepL 0.6s ease-in-out infinite alternate;
+}
+
+.cat-paw-right {
+    right: 4px;
+    animation: pawStepR 0.6s ease-in-out infinite alternate 0.3s;
+}
+
+@keyframes pawStepL {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-4px) scale(1.1);
+    }
+}
+
+@keyframes pawStepR {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-4px) scale(1.1);
+    }
+}
+
+/* Tail */
+.cat-tail {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 22px;
+    height: 8px;
+    background: #ffffff;
+    border: 2px solid #ffccd5;
+    border-radius: 10px;
+    transform-origin: left center;
+    animation: tailWag 0.9s ease-in-out infinite alternate;
+    z-index: 1;
+}
+
+@keyframes tailWag {
+    0% {
+        transform: rotate(15deg);
+    }
+
+    50% {
+        transform: rotate(65deg) scaleY(1.15);
+    }
+
+    100% {
+        transform: rotate(5deg);
+    }
+}
+
+/* ==========================================
+   COLOR SCHEMES CHO TỪNG BÉ MÈO
+   ========================================== */
+
+/* 1. Mèo Trắng Tuyết (.cat-white) */
+.cat-white .cat-wrapper {
+    filter: drop-shadow(0 8px 18px rgba(255, 105, 180, 0.45));
+}
+
+/* 2. Mèo Vàng Cam (.cat-ginger) */
+.cat-ginger .cat-wrapper {
+    filter: drop-shadow(0 8px 18px rgba(255, 159, 67, 0.6));
+}
+
+.cat-ginger .cat-head,
+.cat-ginger .cat-body,
+.cat-ginger .cat-ear,
+.cat-ginger .cat-tail,
+.cat-ginger .cat-paw {
+    background: linear-gradient(145deg, #ff9f43 0%, #ee5253 100%);
+    border-color: #d35400;
+}
+
+.cat-ginger .cat-ear::after {
+    background: #ffeaa7;
+}
+
+.cat-ginger .cat-collar {
+    background: #10ac84;
+}
+
+.cat-ginger .cat-whisker {
+    background: rgba(255, 240, 210, 0.9);
+}
+
+.cat-ginger .cat-blush {
+    background: rgba(235, 77, 75, 0.6);
+}
+
+.cat-ginger .cat-bubble {
+    color: #e67e22;
+    border-color: rgba(255, 159, 67, 0.8);
+    box-shadow: 0 8px 25px rgba(255, 159, 67, 0.4);
+}
+
+/* 3. Mèo Đen Phép Thuật (.cat-black) */
+.cat-black .cat-wrapper {
+    filter: drop-shadow(0 8px 18px rgba(255, 215, 0, 0.45));
+}
+
+.cat-black .cat-head,
+.cat-black .cat-body,
+.cat-black .cat-ear,
+.cat-black .cat-tail,
+.cat-black .cat-paw {
+    background: linear-gradient(145deg, #353b48 0%, #1e272e 100%);
+    border-color: #57606f;
+}
+
+.cat-black .cat-ear::after {
+    background: #eb2f06;
+}
+
+.cat-black .cat-eye {
+    background: #ffd700;
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.9);
+}
+
+.cat-black .cat-sparkle {
+    background: #ffffff;
+}
+
+.cat-black .cat-nose,
+.cat-black .cat-mouth {
+    background: #ff6b81;
+    border-color: #ff6b81;
+}
+
+.cat-black .cat-whisker {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.cat-black .cat-collar {
+    background: #e84118;
+}
+
+.cat-black .cat-bubble {
+    color: #9b59b6;
+    border-color: rgba(155, 89, 182, 0.8);
+    box-shadow: 0 8px 25px rgba(155, 89, 182, 0.4);
+}
+
+/* 4. Mèo Hồng Dâu (.cat-pink) */
+.cat-pink .cat-wrapper {
+    filter: drop-shadow(0 8px 18px rgba(255, 71, 87, 0.55));
+}
+
+.cat-pink .cat-head,
+.cat-pink .cat-body,
+.cat-pink .cat-ear,
+.cat-pink .cat-tail,
+.cat-pink .cat-paw {
+    background: linear-gradient(145deg, #ffb8b8 0%, #ff7979 100%);
+    border-color: #ff4757;
+}
+
+.cat-pink .cat-ear::after {
+    background: #ffffff;
+}
+
+.cat-pink .cat-eye {
+    background: #6c5ce7;
+    box-shadow: 0 0 5px rgba(108, 92, 231, 0.8);
+}
+
+.cat-pink .cat-collar {
+    background: #ffa502;
+}
+
+.cat-pink .cat-whisker {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.cat-pink .cat-blush {
+    background: rgba(255, 71, 87, 0.7);
+}
+
+.cat-pink .cat-bubble {
+    color: #e056fd;
+    border-color: rgba(224, 86, 253, 0.8);
+    box-shadow: 0 8px 25px rgba(224, 86, 253, 0.4);
+}
+
+@media (max-width: 768px) {
+    .cat-squad {
+        right: 10px;
+        bottom: 12px;
+        gap: 6px;
+        transform: scale(0.85);
+        transform-origin: bottom right;
+    }
+}
+
+/* ==========================================
+   CUTE INTERACTIVE GOOSE DUO (Đôi Bé Ngỗng Quẩy Dễ Thương)
+   ========================================== */
+.goose-squad {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 9999 !important;
+    display: flex !important;
+    align-items: flex-end;
+    gap: 14px;
+    user-select: none;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+.goose-companion {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    pointer-events: auto;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+
+.goose-companion:hover {
+    transform: scale(1.15) translateY(-6px);
+    filter: brightness(1.08);
+}
+
+.goose-wrapper {
+    position: relative;
+    width: 66px;
+    height: 74px;
+    filter: drop-shadow(0 8px 18px rgba(255, 182, 193, 0.45));
+    transform-origin: bottom center;
+}
+
+/* Goose Speech Bubble */
+.goose-bubble {
+    position: absolute;
+    bottom: 95px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px) scale(0.9);
+    width: max-content;
+    max-width: 220px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.94);
+    border: 2px solid rgba(255, 182, 193, 0.85);
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #ff4081;
+    box-shadow: 0 8px 25px rgba(255, 105, 180, 0.35), 0 0 15px rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 20;
+    text-align: center;
+}
+
+.goose-bubble.active {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+
+/* Goose Geometry */
+.goose-head {
+    position: absolute;
+    top: 2px;
+    left: 17px;
+    width: 32px;
+    height: 30px;
+    background: linear-gradient(145deg, #ffffff 0%, #fff5f8 100%);
+    border: 2px solid #ffccd5;
+    border-radius: 50%;
+    z-index: 5;
+}
+
+.goose-beak {
+    position: absolute;
+    top: 13px;
+    left: -10px;
+    width: 15px;
+    height: 10px;
+    background: #ff9f43;
+    border-radius: 12px 4px 12px 10px;
+    box-shadow: inset 0 -2px 4px rgba(230, 100, 0, 0.4);
+    border: 1px solid #e67e22;
+}
+
+.goose-eye {
+    position: absolute;
+    top: 8px;
+    width: 5px;
+    height: 5px;
+    background: #222f3e;
+    border-radius: 50%;
+}
+
+.goose-eye-left {
+    left: 6px;
+}
+
+.goose-eye-right {
+    right: 12px;
+}
+
+.goose-blush {
+    position: absolute;
+    top: 15px;
+    width: 6px;
+    height: 4px;
+    background: rgba(255, 105, 180, 0.55);
+    border-radius: 50%;
+}
+
+.goose-blush-left {
+    left: 4px;
+}
+
+.goose-blush-right {
+    right: 8px;
+}
+
+.goose-neck {
+    position: absolute;
+    top: 22px;
+    left: 23px;
+    width: 18px;
+    height: 22px;
+    background: linear-gradient(180deg, #ffffff, #fff0f5);
+    border: 2px solid #ffccd5;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    z-index: 4;
+}
+
+.goose-body {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    width: 50px;
+    height: 36px;
+    background: linear-gradient(145deg, #ffffff 0%, #ffe4ec 100%);
+    border: 2px solid #ffccd5;
+    border-radius: 50% 60% 40% 50%;
+    z-index: 3;
+}
+
+.goose-wing {
+    position: absolute;
+    top: 6px;
+    width: 20px;
+    height: 15px;
+    background: #ffffff;
+    border: 1.8px solid #ffccd5;
+    border-radius: 50% 10% 50% 50%;
+    transform-origin: top center;
+}
+
+.goose-wing-left {
+    left: 2px;
+}
+
+.goose-wing-right {
+    right: 6px;
+    transform: scaleX(-1);
+}
+
+.goose-feet {
+    position: absolute;
+    bottom: 0px;
+    left: 18px;
+    width: 30px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 2;
+}
+
+.goose-foot {
+    width: 13px;
+    height: 8px;
+    background: #ff9f43;
+    border: 1px solid #e67e22;
+    border-radius: 50% 50% 20% 20%;
+}
+
+.goose-bow,
+.goose-crown {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.1rem;
+    z-index: 7;
+}
+
+/* ==========================================
+   VŨ ĐẠO SIÊU CUTE CHO ĐÔI BÉ NGỖNG
+   ========================================== */
+/* 1. Bé Ngỗng Trắng Nơ Hồng: Nhảy Lắc Lư Điệu Disco / Waddle */
+.goose-white .goose-wrapper {
+    animation: gooseWaddleDance 0.58s ease-in-out infinite alternate;
+}
+
+.goose-white .goose-head {
+    animation: gooseHeadBob 0.58s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+.goose-white .goose-wing-left {
+    animation: gooseWingFlapL 0.58s ease-in-out infinite alternate;
+}
+
+.goose-white .goose-wing-right {
+    animation: gooseWingFlapR 0.58s ease-in-out infinite alternate;
+}
+
+@keyframes gooseWaddleDance {
+    0% {
+        transform: translateY(0) rotate(-10deg) scale(1.05, 0.95);
+    }
+
+    50% {
+        transform: translateY(-14px) rotate(0deg) scale(0.96, 1.06);
+    }
+
+    100% {
+        transform: translateY(-3px) rotate(12deg) scale(1.05, 0.95);
+    }
+}
+
+@keyframes gooseHeadBob {
+    0% {
+        transform: rotate(-8deg) translateX(-2px);
+    }
+
+    100% {
+        transform: rotate(10deg) translateX(3px);
+    }
+}
+
+@keyframes gooseWingFlapL {
+    0% {
+        transform: rotate(-25deg) translateY(-2px);
+    }
+
+    100% {
+        transform: rotate(35deg) translateY(2px);
+    }
+}
+
+@keyframes gooseWingFlapR {
+    0% {
+        transform: scaleX(-1) rotate(-25deg) translateY(-2px);
+    }
+
+    100% {
+        transform: scaleX(-1) rotate(35deg) translateY(2px);
+    }
+}
+
+/* 2. Bé Ngỗng Hoàng Gia: Gật Gù Quẩy Honk Honk Theo Bass */
+.goose-gold .goose-wrapper {
+    animation: gooseHonkPump 0.38s ease-in-out infinite alternate;
+}
+
+.goose-gold .goose-head {
+    animation: gooseCrownSnap 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite alternate;
+}
+
+.goose-gold .goose-wing-left {
+    animation: gooseWingFlapFast 0.38s ease-in-out infinite alternate;
+}
+
+.goose-gold .goose-wing-right {
+    animation: gooseWingFlapFastR 0.38s ease-in-out infinite alternate;
+}
+
+@keyframes gooseHonkPump {
+    0% {
+        transform: translateY(0) scale(1.12, 0.88) rotate(-4deg);
+    }
+
+    100% {
+        transform: translateY(-22px) scale(0.9, 1.14) rotate(4deg);
+    }
+}
+
+@keyframes gooseCrownSnap {
+    0% {
+        transform: translateY(0) rotate(-6deg);
+    }
+
+    100% {
+        transform: translateY(-6px) rotate(8deg);
+    }
+}
+
+@keyframes gooseWingFlapFast {
+    0% {
+        transform: rotate(-40deg);
+    }
+
+    100% {
+        transform: rotate(45deg);
+    }
+}
+
+@keyframes gooseWingFlapFastR {
+    0% {
+        transform: scaleX(-1) rotate(-40deg);
+    }
+
+    100% {
+        transform: scaleX(-1) rotate(45deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .goose-squad {
+        left: 10px;
+        bottom: 12px;
+        gap: 6px;
+        transform: scale(0.85);
+        transform-origin: bottom left;
+    }
+}
+
+/* ==========================================
+   AUTHOR PROFILE MODAL (Tác Giả)
+   ========================================== */
+.author-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(3, 1, 10, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.author-modal.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.author-card {
+    position: relative;
+    width: 90%;
+    max-width: 420px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 182, 193, 0.08) 100%);
+    border: 1.5px solid rgba(255, 182, 193, 0.45);
+    border-radius: 28px;
+    padding: 36px 28px 30px;
+    text-align: center;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65), 0 0 35px rgba(255, 105, 180, 0.25);
+    backdrop-filter: blur(24px);
+    transform: translateY(30px) scale(0.92);
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.author-modal.open .author-card {
+    transform: translateY(0) scale(1);
+}
+
+.close-author-btn {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    font-size: 1.6rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    transition: all 0.3s ease;
+}
+
+.close-author-btn:hover {
+    background: rgba(255, 105, 180, 0.6);
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* Author Photo */
+.author-photo-wrapper {
+    position: relative;
+    width: 130px;
+    height: 130px;
+    margin: 0 auto 20px;
+}
+
+.author-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 10px 30px rgba(255, 105, 180, 0.5);
+    position: relative;
+    z-index: 2;
+}
+
+.author-photo-glow {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    width: calc(100% + 12px);
+    height: calc(100% + 12px);
+    border-radius: 50%;
+    background: linear-gradient(45deg, #ff69b4, #ffd700, #ff4081, #b388ff);
+    z-index: 1;
+    animation: rotateGlow 4s linear infinite;
+    filter: blur(4px);
+}
+
+@keyframes rotateGlow {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.author-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 6px;
+    text-shadow: 0 0 15px rgba(255, 105, 180, 0.8);
+}
+
+.author-role {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #ffb6c1;
+    margin-bottom: 16px;
+}
+
+.author-quote {
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    border-left: 3px solid #ff69b4;
+    margin-bottom: 20px;
+}
+
+.author-quote p {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff0f5;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.author-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.author-tag {
+    padding: 5px 12px;
+    background: rgba(255, 105, 180, 0.2);
+    border: 1px solid rgba(255, 182, 193, 0.4);
+    border-radius: 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #ffffff;
+    backdrop-filter: blur(8px);
+}
+
+/* ==========================================
+   MUSIC PLAYER MODAL (VŨ. vs M-TP)
+   ========================================== */
+.music-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(3, 1, 10, 0.78);
+    backdrop-filter: blur(16px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.music-modal.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.music-card {
+    position: relative;
+    width: 90%;
+    max-width: 440px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 105, 180, 0.08) 100%);
+    border: 1.5px solid rgba(255, 182, 193, 0.5);
+    border-radius: 28px;
+    padding: 32px 24px 26px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 35px rgba(255, 105, 180, 0.3);
+    backdrop-filter: blur(24px);
+    transform: translateY(30px) scale(0.92);
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.music-modal.open .music-card {
+    transform: translateY(0) scale(1);
+}
+
+.close-music-btn {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    font-size: 1.6rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    transition: all 0.3s ease;
+}
+
+.close-music-btn:hover {
+    background: rgba(255, 105, 180, 0.6);
+    transform: rotate(90deg) scale(1.1);
+}
+
+.music-modal-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.music-modal-icon {
+    font-size: 2.2rem;
+    margin-bottom: 6px;
+    animation: bounceIcon 2s infinite alternate ease-in-out;
+}
+
+@keyframes bounceIcon {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-6px);
+    }
+}
+
+.music-modal-header h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 4px;
+    text-shadow: 0 0 15px rgba(255, 105, 180, 0.8);
+}
+
+.music-modal-header p {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+    color: #ffccd5;
+    margin: 0;
+}
+
+/* Genre Switch Tabs */
+.genre-tabs {
+    display: flex;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px;
+    border-radius: 35px;
+    border: 1px solid rgba(255, 182, 193, 0.3);
+    margin-bottom: 18px;
+}
+
+.genre-tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 30px;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.genre-tab-btn.active {
+    background: linear-gradient(135deg, #ff4081, #ff79b0);
+    box-shadow: 0 4px 15px rgba(255, 64, 129, 0.4);
+}
+
+/* Song List */
+.song-list {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: 18px;
+    padding-right: 4px;
+}
+
+.song-list.active {
+    display: flex;
+}
+
+.song-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 182, 193, 0.2);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.song-item:hover {
+    background: rgba(255, 105, 180, 0.25);
+    border-color: rgba(255, 182, 193, 0.6);
+    transform: translateX(4px);
+}
+
+.song-item.active {
+    background: linear-gradient(90deg, rgba(255, 105, 180, 0.35) 0%, rgba(255, 64, 129, 0.15) 100%);
+    border-color: #ff69b4;
+    box-shadow: 0 4px 14px rgba(255, 105, 180, 0.25);
+}
+
+.song-num {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #ff80ab;
+}
+
+.song-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.song-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.song-artist {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.75rem;
+    color: #ffccd5;
+}
+
+.song-play-icon {
+    font-size: 0.85rem;
+    color: #ffffff;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.song-item.active .song-play-icon {
+    color: #ff4081;
+    opacity: 1;
+}
+
+/* Upload button */
+.music-upload-section {
+    display: flex;
+    justify-content: center;
+}
+
+.upload-music-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px dashed rgba(255, 182, 193, 0.5);
+    border-radius: 25px;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-music-btn:hover {
+    background: rgba(255, 105, 180, 0.3);
+    border-color: #ff69b4;
+    transform: scale(1.02);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .top-controls {
+        padding: 12px 12px;
+        gap: 8px;
+    }
+
+    .top-controls .left-cluster,
+    .top-controls .right-cluster {
+        gap: 6px;
+    }
+
+    .glass-btn {
+        padding: 6px 10px;
+        font-size: 0.78rem;
+    }
+
+    .hint-label {
+        font-size: 1.05rem;
+    }
+
+    .hint-text {
+        bottom: 18px;
+        padding: 6px 14px;
+        width: 90%;
+        justify-content: center;
+    }
+
+    .letter-card {
+        padding: 28px 20px;
+    }
+
+    .letter-body p {
+        font-size: 1.25rem;
+    }
+
+    .cat-companion {
+        bottom: 18px;
+        right: 14px;
+        transform: scale(0.82);
+    }
+
+    .cat-companion:hover {
+        transform: scale(0.88) translateY(-2px);
+    }
+
+    .cat-bubble {
+        bottom: 85px;
+        right: 0px;
+        max-width: 170px;
+        font-size: 0.78rem;
+        padding: 8px 12px;
+    }
+}
+
+/* ==========================================
+   COMPLETE STEP-BY-STEP GUIDED TOUR SYSTEM (HƯỚNG DẪN TỪ ĐẦU ĐẾN CUỐI)
+   ========================================== */
+.tour-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999;
+    pointer-events: none !important;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.tour-overlay.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+}
+
+/* Spotlight Highlight Box (Khung Dạ Quang Không Chặn Click) */
+.tour-spotlight {
+    position: absolute;
+    border-radius: 20px;
+    border: 2.5px solid #ff79b0;
+    box-shadow: 0 0 25px rgba(255, 105, 180, 0.9), inset 0 0 15px rgba(255, 105, 180, 0.5);
+    transition: all 0.25s ease-out;
+    pointer-events: none !important;
+    z-index: 999991;
+}
+
+.tour-spotlight-pulse {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    width: calc(100% + 12px);
+    height: calc(100% + 12px);
+    border-radius: 24px;
+    border: 2px dashed rgba(255, 255, 255, 0.9);
+    animation: rotateSpotlightPulse 8s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotateSpotlightPulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.04);
+        opacity: 0.4;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+}
+
+/* Bouncing Pointer Arrow */
+.tour-pointer {
+    position: absolute;
+    font-size: 2.4rem;
+    filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.9));
+    animation: pointerBounce 1.2s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 999995;
+    transition: all 0.25s ease-out;
+}
+
+@keyframes pointerBounce {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-10px) scale(1.18);
+    }
+}
+
+/* Floating Tour Card (Nhận Click 100%) */
+.tour-card {
+    position: absolute;
+    width: 360px;
+    max-width: 92vw;
+    background: linear-gradient(135deg, rgba(30, 15, 55, 0.98) 0%, rgba(55, 20, 80, 0.95) 100%);
+    border: 1.5px solid rgba(255, 182, 193, 0.75);
+    border-radius: 24px;
+    padding: 22px 24px 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 35px rgba(255, 105, 180, 0.6);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    z-index: 999999 !important;
+    transition: all 0.25s ease-out;
+    color: #ffffff;
+    user-select: none;
+    pointer-events: auto !important;
+}
+
+.tour-close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffccd5;
+    font-size: 1.1rem;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s ease;
+    pointer-events: auto !important;
+}
+
+.tour-close-btn:hover {
+    background: rgba(255, 64, 129, 0.8);
+    color: #ffffff;
+    transform: scale(1.15) rotate(90deg);
+}
+
+.tour-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-right: 28px;
+    pointer-events: auto;
+}
+
+.tour-step-badge {
+    background: linear-gradient(135deg, #ff4081, #ff79b0);
+    padding: 4px 12px;
+    border-radius: 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 10px rgba(255, 64, 129, 0.4);
+}
+
+.tour-voice-btn {
+    background: rgba(255, 64, 129, 0.3);
+    border: 1px solid rgba(255, 182, 193, 0.6);
+    color: #fff0f5;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    pointer-events: auto !important;
+}
+
+.tour-voice-btn:hover {
+    background: linear-gradient(135deg, #ff4081, #ff79b0);
+    color: #ffffff;
+    transform: scale(1.06);
+    box-shadow: 0 0 12px rgba(255, 105, 180, 0.8);
+}
+
+.tour-dots {
+    display: flex;
+    gap: 6px;
+    pointer-events: auto;
+}
+
+.tour-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    pointer-events: auto !important;
+}
+
+.tour-dot.active {
+    width: 18px;
+    border-radius: 10px;
+    background: #ff79b0;
+    box-shadow: 0 0 8px #ff79b0;
+}
+
+.tour-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.12rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 8px;
+    text-shadow: 0 0 12px rgba(255, 105, 180, 0.6);
+}
+
+.tour-desc {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: #ffd6e0;
+    margin-bottom: 18px;
+}
+
+.tour-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    pointer-events: auto;
+}
+
+.tour-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: none;
+    pointer-events: auto !important;
+}
+
+.tour-btn-skip {
+    background: transparent;
+    color: #ffccd5;
+    margin-right: auto;
+    padding-left: 0;
+}
+
+.tour-btn-skip:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.tour-btn-prev {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.tour-btn-prev:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.tour-btn-next {
+    background: linear-gradient(135deg, #ff4081, #ff79b0);
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(255, 64, 129, 0.5);
+}
+
+.tour-btn-next:hover {
+    background: linear-gradient(135deg, #ff2a70, #ff69a5);
+    box-shadow: 0 6px 20px rgba(255, 64, 129, 0.7);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .tour-card {
+        width: 90vw;
+        padding: 18px 18px 16px;
+    }
+
+    .tour-title {
+        font-size: 1.02rem;
+    }
+
+    .tour-desc {
+        font-size: 0.82rem;
+        margin-bottom: 14px;
+    }
+
+    .tour-btn {
+        padding: 7px 13px;
+        font-size: 0.78rem;
+    }
+}

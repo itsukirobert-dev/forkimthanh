@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Google Fonts: Dancing Script & Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="love.css">
+    <title>Love Fantasy Heart</title>
+</head>
+
+<body class="love">
+    <div class="container">
+        <div class="content" id="parallaxContent">
+            <!-- Background Image with Overlay -->
+            <div class="background" id="bgLayer">
+                <img class="hinh" src="bg.jpg" alt="Love Background">
+                <div class="bg-overlay"></div>
+            </div>
+
+            <!-- Top Header Action Controls (Gọn Gàng & Đa Năng) -->
+            <div class="top-controls">
+                <!-- Đồng Hồ Đếm Ngày Yêu Nhau (Love Days Counter Widget) -->
+                <div id="loveDaysWidget" class="love-days-widget glass-card-mini"
+                    title="Bấm để mở tùy chỉnh tên & ngày kỷ niệm">
+                    <span class="heart-pulse-icon">💖</span>
+                    <span class="love-names-text" id="widgetNames">Mai IT &amp; Kim Thanh</span>
+                    <span class="love-days-badge" id="widgetDaysText">Đã yêu: 365 ngày</span>
+                </div>
+
+                <div class="hub-launcher-bar">
+                    <!-- Fireworks Trigger Button -->
+                    <button id="fireworksBtn" class="glass-btn fireworks-btn" title="Bắn pháo hoa trái tim bùng nổ 🎆">
+                        <span class="btn-icon">🎆</span>
+                        <span class="btn-text">Pháo Hoa</span>
+                    </button>
+
+                    <!-- Main Floating Hub Trigger Button -->
+                    <button id="hubToggleBtn" class="glass-btn hub-btn" title="Mở Hộp Tiện Ích & Điều Khiển">
+                        <span class="hub-icon-glow">✨</span>
+                        <span class="btn-text">Menu Điều Khiển</span>
+                        <span class="hub-badge-dot"></span>
+                    </button>
+
+                    <!-- Direct Tour Guide Button on Top Bar -->
+                    <button id="topTourGuideBtn" class="glass-btn tour-guide-btn" title="Xem hướng dẫn sử dụng 14 bước">
+                        <span class="btn-icon">🧭</span>
+                        <span class="btn-text">Hướng Dẫn</span>
+                    </button>
+
+                    <!-- Quick Music Play/Pause Mini Disc -->
+                    <button id="musicToggle" class="glass-btn music-btn mini" title="Bật / Tắt nhạc"
+                        aria-label="Bật / Tắt nhạc">
+                        <div class="disc-icon">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5zm0-5.5c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z" />
+                            </svg>
+                        </div>
+                        <div class="music-waves">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Floating Glass Control Hub Modal (Hộp Tiện Ích Đa Năng Tinh Gọn) -->
+                <div id="controlHubModal" class="control-hub-modal">
+                    <div class="control-hub-backdrop" id="hubBackdrop"></div>
+                    <div class="control-hub-card">
+                        <div class="hub-header">
+                            <div class="hub-title">
+                                <span class="hub-header-icon">⚙️</span>
+                                <h3>Trung Tâm Tiện Ích</h3>
+                            </div>
+                            <button id="closeHubBtn" class="close-hub-btn" aria-label="Đóng Menu">&times;</button>
+                        </div>
+
+                        <p class="hub-subtitle">Tùy chỉnh không gian vũ trụ tình yêu & âm nhạc 💖</p>
+
+                        <div class="hub-grid">
+                            <!-- 1. Kiểu Dáng Tim -->
+                            <div class="hub-item-group">
+                                <button id="shapeToggle" class="hub-item-btn shape-btn"
+                                    title="Bấm đổi kiểu dáng tiếp theo">
+                                    <div class="hub-item-icon" id="shapeIcon">🌌</div>
+                                    <div class="hub-item-info">
+                                        <span class="hub-item-title">Kiểu Dáng Tim</span>
+                                        <span class="hub-item-desc" id="shapeName">Thiên Hà</span>
+                                    </div>
+                                </button>
+                                <div class="hub-chips-row" id="shapeChips">
+                                    <button class="hub-chip active" data-shape="galaxy">🌌 Thiên Hà</button>
+                                    <button class="hub-chip" data-shape="flower">🌸 Hoa Hồng</button>
+                                    <button class="hub-chip" data-shape="sphere">🔮 Quả Cầu</button>
+                                    <button class="hub-chip" data-shape="ribbon">♾️ Vô Cực</button>
+                                    <button class="hub-chip" data-shape="crystal">💎 Pha Lê</button>
+                                </div>
+                            </div>
+
+                            <!-- 2. 10 Sắc Màu -->
+                            <div class="hub-item-group">
+                                <button id="themeToggle" class="hub-item-btn theme-btn"
+                                    title="Bấm đổi màu sắc tiếp theo">
+                                    <div class="hub-item-icon" id="themeIcon">💖</div>
+                                    <div class="hub-item-info">
+                                        <span class="hub-item-title">10 Sắc Màu</span>
+                                        <span class="hub-item-desc" id="themeName">Hồng Dạ Quang</span>
+                                    </div>
+                                </button>
+                                <div class="hub-chips-row" id="themeChips">
+                                    <button class="hub-chip active" data-theme="pink">💖 Hồng</button>
+                                    <button class="hub-chip" data-theme="galaxy">🌌 Vũ Trụ</button>
+                                    <button class="hub-chip" data-theme="gold">👑 Hoàng Gia</button>
+                                    <button class="hub-chip" data-theme="aurora">❄️ Băng Tuyết</button>
+                                    <button class="hub-chip" data-theme="emerald">💚 Ngọc Lục</button>
+                                    <button class="hub-chip" data-theme="sunset">🧡 Hoàng Hôn</button>
+                                    <button class="hub-chip" data-theme="sakura">🌸 Sakura</button>
+                                    <button class="hub-chip" data-theme="ocean">🌊 Đại Dương</button>
+                                    <button class="hub-chip" data-theme="diamond">💎 Kim Cương</button>
+                                    <button class="hub-chip" data-theme="rainbow">🌈 Cầu Vồng</button>
+                                </div>
+                            </div>
+
+                            <!-- 3. Không Gian Nền -->
+                            <div class="hub-item-group">
+                                <button id="bgModeToggle" class="hub-item-btn bg-mode-btn"
+                                    title="Bấm đổi nền tiếp theo">
+                                    <div class="hub-item-icon" id="bgModeIcon">🖼️</div>
+                                    <div class="hub-item-info">
+                                        <span class="hub-item-title">Không Gian Nền</span>
+                                        <span class="hub-item-desc" id="bgModeName">Nền: Chuẩn</span>
+                                    </div>
+                                </button>
+                                <div class="hub-chips-row" id="bgChips">
+                                    <button class="hub-chip active" data-bg="default">🖼️ Nền Chuẩn</button>
+                                    <button class="hub-chip" data-bg="art">🌸 Hoa Anh Đào</button>
+                                    <button class="hub-chip" data-bg="galaxy_bg">🌌 Thiên Hà 3D</button>
+                                    <button class="hub-chip" data-bg="pure">🌄 Thuần Khiết</button>
+                                </div>
+                            </div>
+
+                            <!-- 4. Đổi Ca Sĩ -->
+                            <div class="hub-item-group">
+                                <button id="musicGenreToggle" class="hub-item-btn music-genre-btn"
+                                    title="Bấm đổi ca sĩ">
+                                    <div class="hub-item-icon" id="genreIcon">🎸</div>
+                                    <div class="hub-item-info">
+                                        <span class="hub-item-title">Đổi Ca Sĩ</span>
+                                        <span class="hub-item-desc" id="genreName">Dòng nhạc Vũ.</span>
+                                    </div>
+                                </button>
+                                <div class="hub-chips-row" id="genreChips">
+                                    <button class="hub-chip active" data-genre="vu">🎸 Vũ. Acoustic</button>
+                                    <button class="hub-chip" data-genre="mtp">🔥 Sơn Tùng M-TP</button>
+                                </div>
+                            </div>
+
+                            <!-- 5. Bắn Pháo Hoa Trái Tim -->
+                            <div class="hub-item-group single">
+                                <button id="hubFireworksBtn" class="hub-item-btn fireworks-item-btn"
+                                    title="Bắn pháo hoa trái tim bùng nổ">
+                                    <div class="hub-item-icon">🎆</div>
+                                    <div class="hub-item-info">
+                                        <span class="hub-item-title">Pháo Hoa Trái Tim</span>
+                                        <span class="hub-item-desc">Bùng nổ pháo hoa đa sắc</span>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- 6. Đổi Tên & Ngày Kỷ Niệm -->
+                            <div class="hub-item-group single">
+                                <button id="nameEditorBtn" class="hub-item-btn name-editor-btn"
+                                    title="Tùy chỉnh tên người nhận & ngày yêu">
+                                    <div class="hub-item-icon">✍️</div>
+                                    <div class="hub-item-info">
+                                        <span class="hub-item-title">Tùy Chỉnh Tên & Kỷ Niệm</span>
+                                        <span class="hub-item-desc">Đổi tên & ngày yêu nhau</span>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- 7. Kho Nhạc -->
+                            <div class="hub-item-group single">
+                                <button id="openPlaylistBtn" class="hub-item-btn playlist-btn"
+                                    title="Mở kho bài hát chi tiết">
+                                    <div class="hub-item-icon">🎵</div>
+                                    <div class="hub-item-info">
+                                        <span class="hub-item-title">Kho Nhạc</span>
+                                        <span class="hub-item-desc">Chọn bài hát & tải MP3</span>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- 8. Thư Tình Bí Mật -->
+                            <div class="hub-item-group single">
+                                <button id="letterBtn" class="hub-item-btn letter-btn" title="Mở bức thư tình bí mật">
+                                    <div class="hub-item-icon">💌</div>
+                                    <div class="hub-item-info">
+                                        <span class="hub-item-title">Thư Tình Bí Mật</span>
+                                        <span class="hub-item-desc">Lời chúc ấm áp</span>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- 9. Tác Giả (Mai IT) -->
+                            <div class="hub-item-group single">
+                                <button id="authorBtn" class="hub-item-btn author-btn"
+                                    title="Xem thông tin tác giả Mai IT">
+                                    <div class="hub-item-icon">👑</div>
+                                    <div class="hub-item-info">
+                                        <span class="hub-item-title">Tác Giả</span>
+                                        <span class="hub-item-desc">Mai IT • Developer</span>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- 10. Interactive Tour Guide -->
+                            <div class="hub-item-group single">
+                                <button id="tourGuideBtn" class="hub-item-btn tour-guide-btn"
+                                    title="Xem hướng dẫn sử dụng 15 bước">
+                                    <div class="hub-item-icon">🧭</div>
+                                    <div class="hub-item-info">
+                                        <span class="hub-item-title">Hướng Dẫn</span>
+                                        <span class="hub-item-desc">Tour 15 bước chi tiết</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Heart Canvas Container -->
+            <div class="love-content">
+                <canvas id="heartCanvas"></canvas>
+            </div>
+
+            <!-- Floating Combo Text Indicator -->
+            <div id="comboBadge" class="combo-badge"></div>
+
+            <!-- Cute Interactive Cat Squad (Hội Bé Mèo Đa Sắc) -->
+            <div id="catSquad" class="cat-squad">
+                <!-- Cat 1: Mèo Trắng Tuyết -->
+                <div class="cat-companion cat-white" data-cat="white" title="Bé Mèo Trắng Tuyết ⚪">
+                    <div class="cat-bubble">Purrr... Em là điều ngọt ngào nhất thế gian! 🌸✨</div>
+                    <div class="cat-wrapper">
+                        <div class="cat-halo">✨</div>
+                        <div class="cat-ear cat-ear-left"></div>
+                        <div class="cat-ear cat-ear-right"></div>
+                        <div class="cat-head">
+                            <div class="cat-eye cat-eye-left">
+                                <div class="cat-pupil"></div>
+                                <div class="cat-sparkle"></div>
+                            </div>
+                            <div class="cat-eye cat-eye-right">
+                                <div class="cat-pupil"></div>
+                                <div class="cat-sparkle"></div>
+                            </div>
+                            <div class="cat-blush cat-blush-left"></div>
+                            <div class="cat-blush cat-blush-right"></div>
+                            <div class="cat-nose"></div>
+                            <div class="cat-mouth"></div>
+                            <div class="cat-whisker cat-whisker-l1"></div>
+                            <div class="cat-whisker cat-whisker-l2"></div>
+                            <div class="cat-whisker cat-whisker-r1"></div>
+                            <div class="cat-whisker cat-whisker-r2"></div>
+                        </div>
+                        <div class="cat-body">
+                            <div class="cat-collar"><span class="cat-bell">🔔</span></div>
+                            <div class="cat-paw cat-paw-left"></div>
+                            <div class="cat-paw cat-paw-right"></div>
+                        </div>
+                        <div class="cat-tail"></div>
+                    </div>
+                </div>
+
+                <!-- Cat 2: Mèo Vàng Cam -->
+                <div class="cat-companion cat-ginger" data-cat="ginger" title="Bé Mèo Vàng Cam 🐱">
+                    <div class="cat-bubble">Meow~ Cho tui xin một miếng cá với một cái ôm nha! 🐟🐾</div>
+                    <div class="cat-wrapper">
+                        <div class="cat-halo">⭐</div>
+                        <div class="cat-ear cat-ear-left"></div>
+                        <div class="cat-ear cat-ear-right"></div>
+                        <div class="cat-head">
+                            <div class="cat-eye cat-eye-left">
+                                <div class="cat-pupil"></div>
+                                <div class="cat-sparkle"></div>
+                            </div>
+                            <div class="cat-eye cat-eye-right">
+                                <div class="cat-pupil"></div>
+                                <div class="cat-sparkle"></div>
+                            </div>
+                            <div class="cat-blush cat-blush-left"></div>
+                            <div class="cat-blush cat-blush-right"></div>
+                            <div class="cat-nose"></div>
+                            <div class="cat-mouth"></div>
+                            <div class="cat-whisker cat-whisker-l1"></div>
+                            <div class="cat-whisker cat-whisker-l2"></div>
+                            <div class="cat-whisker cat-whisker-r1"></div>
+                            <div class="cat-whisker cat-whisker-r2"></div>
+                        </div>
+                        <div class="cat-body">
+                            <div class="cat-collar"><span class="cat-bell">🐟</span></div>
+                            <div class="cat-paw cat-paw-left"></div>
+                            <div class="cat-paw cat-paw-right"></div>
+                        </div>
+                        <div class="cat-tail"></div>
+                    </div>
+                </div>
+
+                <!-- Cat 3: Mèo Đen Huyền Bí -->
+                <div class="cat-companion cat-black" data-cat="black" title="Bé Mèo Đen Phép Thuật ⚫">
+                    <div class="cat-bubble">Meow meow~ Tôi là mèo phép thuật mang lại may mắn nè! 🪄🐾</div>
+                    <div class="cat-wrapper">
+                        <div class="cat-halo">🌙</div>
+                        <div class="cat-ear cat-ear-left"></div>
+                        <div class="cat-ear cat-ear-right"></div>
+                        <div class="cat-head">
+                            <div class="cat-eye cat-eye-left">
+                                <div class="cat-pupil"></div>
+                                <div class="cat-sparkle"></div>
+                            </div>
+                            <div class="cat-eye cat-eye-right">
+                                <div class="cat-pupil"></div>
+                                <div class="cat-sparkle"></div>
+                            </div>
+                            <div class="cat-blush cat-blush-left"></div>
+                            <div class="cat-blush cat-blush-right"></div>
+                            <div class="cat-nose"></div>
+                            <div class="cat-mouth"></div>
+                            <div class="cat-whisker cat-whisker-l1"></div>
+                            <div class="cat-whisker cat-whisker-l2"></div>
+                            <div class="cat-whisker cat-whisker-r1"></div>
+                            <div class="cat-whisker cat-whisker-r2"></div>
+                        </div>
+                        <div class="cat-body">
+                            <div class="cat-collar"><span class="cat-bell">🎀</span></div>
+                            <div class="cat-paw cat-paw-left"></div>
+                            <div class="cat-paw cat-paw-right"></div>
+                        </div>
+                        <div class="cat-tail"></div>
+                    </div>
+                </div>
+
+                <!-- Cat 4: Mèo Hồng Dâu -->
+                <div class="cat-companion cat-pink" data-cat="pink" title="Bé Mèo Hồng Dâu 🌸">
+                    <div class="cat-bubble">Nyaa~ Yêu bạn 3000 lần luôn á! 🍓💖</div>
+                    <div class="cat-wrapper">
+                        <div class="cat-halo">🍓</div>
+                        <div class="cat-ear cat-ear-left"></div>
+                        <div class="cat-ear cat-ear-right"></div>
+                        <div class="cat-head">
+                            <div class="cat-eye cat-eye-left">
+                                <div class="cat-pupil"></div>
+                                <div class="cat-sparkle"></div>
+                            </div>
+                            <div class="cat-eye cat-eye-right">
+                                <div class="cat-pupil"></div>
+                                <div class="cat-sparkle"></div>
+                            </div>
+                            <div class="cat-blush cat-blush-left"></div>
+                            <div class="cat-blush cat-blush-right"></div>
+                            <div class="cat-nose"></div>
+                            <div class="cat-mouth"></div>
+                            <div class="cat-whisker cat-whisker-l1"></div>
+                            <div class="cat-whisker cat-whisker-l2"></div>
+                            <div class="cat-whisker cat-whisker-r1"></div>
+                            <div class="cat-whisker cat-whisker-r2"></div>
+                        </div>
+                        <div class="cat-body">
+                            <div class="cat-collar"><span class="cat-bell">💖</span></div>
+                            <div class="cat-paw cat-paw-left"></div>
+                            <div class="cat-paw cat-paw-right"></div>
+                        </div>
+                        <div class="cat-tail"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cute Interactive Goose Duo (Đôi Bé Ngỗng Quẩy Dễ Thương) -->
+            <div id="gooseSquad" class="goose-squad">
+                <!-- Goose 1: Bé Ngỗng Trắng Nơ Hồng (Đang lắc lư / nhún nhảy điệu Disco) -->
+                <div class="goose-companion goose-white" data-goose="white" title="Bé Ngỗng Trắng Nơ Hồng 🪿🎀">
+                    <div class="goose-bubble">Cạp cạp! Hôm nay Kim Thanh có nhớ người ta không đấy? 🪿💖</div>
+                    <div class="goose-wrapper">
+                        <div class="goose-bow">🎀</div>
+                        <div class="goose-head">
+                            <div class="goose-eye goose-eye-left"></div>
+                            <div class="goose-eye goose-eye-right"></div>
+                            <div class="goose-beak"></div>
+                            <div class="goose-blush goose-blush-left"></div>
+                            <div class="goose-blush goose-blush-right"></div>
+                        </div>
+                        <div class="goose-neck"></div>
+                        <div class="goose-body">
+                            <div class="goose-wing goose-wing-left"></div>
+                            <div class="goose-wing goose-wing-right"></div>
+                        </div>
+                        <div class="goose-feet">
+                            <div class="goose-foot goose-foot-left"></div>
+                            <div class="goose-foot goose-foot-right"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goose 2: Bé Ngỗng Hoàng Gia Đội Mũ (Lắc đầu quẩy nhạc cực sung) -->
+                <div class="goose-companion goose-gold" data-goose="gold" title="Bé Ngỗng Hoàng Gia 🪿👑">
+                    <div class="goose-bubble">Honk honk! Đố bạn biết ai yêu bạn nhất trên đời? 🪿👑✨</div>
+                    <div class="goose-wrapper">
+                        <div class="goose-crown">👑</div>
+                        <div class="goose-head">
+                            <div class="goose-eye goose-eye-left"></div>
+                            <div class="goose-eye goose-eye-right"></div>
+                            <div class="goose-beak"></div>
+                            <div class="goose-blush goose-blush-left"></div>
+                            <div class="goose-blush goose-blush-right"></div>
+                        </div>
+                        <div class="goose-neck"></div>
+                        <div class="goose-body">
+                            <div class="goose-wing goose-wing-left"></div>
+                            <div class="goose-wing goose-wing-right"></div>
+                        </div>
+                        <div class="goose-feet">
+                            <div class="goose-foot goose-foot-left"></div>
+                            <div class="goose-foot goose-foot-right"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complete Step-by-Step Interactive Guided Tour Overlay (Chế Độ Hướng Dẫn Từng Bước Từ Đầu Đến Cuối) -->
+            <div id="tourOverlay" class="tour-overlay">
+                <div id="tourSpotlight" class="tour-spotlight">
+                    <div class="tour-spotlight-pulse"></div>
+                    <div class="tour-pointer" id="tourPointer">👆</div>
+                </div>
+                <div id="tourCard" class="tour-card">
+                    <button id="tourCloseBtn" class="tour-close-btn" title="Bỏ qua hướng dẫn">✕</button>
+                    <div class="tour-header">
+                        <span class="tour-step-badge" id="tourStepBadge">BƯỚC 1 / 7</span>
+                        <div class="tour-dots" id="tourDots"></div>
+                    </div>
+                    <h3 class="tour-title" id="tourTitle">💖 Khởi Động Trái Tim & Âm Nhạc</h3>
+                    <p class="tour-desc" id="tourDesc">Chạm vào trái tim hoặc bất kỳ đâu trên màn hình để cất tiếng hát
+                        ca sĩ và kích hoạt ánh sáng dạ quang 3D!</p>
+                    <div class="tour-actions">
+                        <button id="tourSkipBtn" class="tour-btn tour-btn-skip">Bỏ qua</button>
+                        <button id="tourPrevBtn" class="tour-btn tour-btn-prev">← Quay lại</button>
+                        <button id="tourNextBtn" class="tour-btn tour-btn-next">Tiếp tục →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secret Love Letter Modal -->
+            <div id="letterModal" class="letter-modal">
+                <div class="letter-card">
+                    <button id="closeLetterBtn" class="close-letter-btn" aria-label="Đóng thư">&times;</button>
+                    <div class="letter-header">
+                        <span class="letter-stamp">💌</span>
+                        <h2>Gửi Người Đặc Biệt Nhất</h2>
+                    </div>
+                    <div class="letter-body">
+                        <p id="typewriterText"></p>
+                    </div>
+                    <div class="letter-footer">
+                        <span class="letter-signature">Forever With Love ❤️</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Author Profile Modal (Tác Giả: Mai IT) -->
+            <div id="authorModal" class="author-modal">
+                <div class="author-card">
+                    <button id="closeAuthorBtn" class="close-author-btn" aria-label="Đóng">&times;</button>
+                    <div class="author-photo-wrapper">
+                        <img src="author.jpg" alt="Tác Giả Mai IT" class="author-photo">
+                        <div class="author-photo-glow"></div>
+                    </div>
+                    <div class="author-info">
+                        <h2 class="author-name">Mai IT ✨</h2>
+                        <p class="author-role">Developer & Creator of Love Universe 💖</p>
+                        <div class="author-quote">
+                            <p>“Mai IT — Người kiến tạo nên không gian vũ trụ tình yêu rực rỡ, lãng mạn và ngọt ngào
+                                nhất...” 🌸🐾</p>
+                        </div>
+                        <div class="author-tags">
+                            <span class="author-tag">💻 Mai IT</span>
+                            <span class="author-tag">🐱 Bé Mèo Yêu</span>
+                            <span class="author-tag">🌌 Thiên Hà 3D</span>
+                            <span class="author-tag">🎸 Nhạc Vũ.</span>
+                            <span class="author-tag">🔥 Nhạc M-TP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Music Player Modal (Trình Phát Nhạc Vũ. vs Sơn Tùng M-TP) -->
+            <div id="musicModal" class="music-modal">
+                <div class="music-card">
+                    <button id="closeMusicBtn" class="close-music-btn" aria-label="Đóng">&times;</button>
+
+                    <div class="music-modal-header">
+                        <div class="music-modal-icon">🎵</div>
+                        <h2>Kho Nhạc Lãng Mạn</h2>
+                        <p>Chọn dòng nhạc Vũ. hoặc Sơn Tùng M-TP</p>
+                    </div>
+
+                    <!-- Genre Switch Tabs -->
+                    <div class="genre-tabs">
+                        <button class="genre-tab-btn active" id="tabVu" data-genre="vu">
+                            <span>🎸</span> Dòng Nhạc Vũ.
+                        </button>
+                        <button class="genre-tab-btn" id="tabMtp" data-genre="mtp">
+                            <span>🔥</span> Dòng Nhạc M-TP
+                        </button>
+                    </div>
+
+                    <!-- Song List for Vũ -->
+                    <div class="song-list active" id="listVu">
+                        <div class="song-item active" data-song="la-lung" data-file="vu_lalung.mp3">
+                            <span class="song-num">01</span>
+                            <div class="song-details">
+                                <span class="song-title">Lạ Lùng 🎙️ (Bản Gốc Có Lời)</span>
+                                <span class="song-artist">Vũ. • Acoustic Indie</span>
+                            </div>
+                            <span class="song-play-icon">▶</span>
+                        </div>
+                        <div class="song-item" data-song="buoc-qua-nhau" data-file="vu_buocquanhau.mp3">
+                            <span class="song-num">02</span>
+                            <div class="song-details">
+                                <span class="song-title">Bước Qua Nhau 🎙️ (Bản Gốc Có Lời)</span>
+                                <span class="song-artist">Vũ. • Lofi Ballad</span>
+                            </div>
+                            <span class="song-play-icon">▶</span>
+                        </div>
+                        <div class="song-item" data-song="thanh-xuan" data-file="vpop_thanhxuan.mp3">
+                            <span class="song-num">03</span>
+                            <div class="song-details">
+                                <span class="song-title">Thanh Xuân 🎙️ (Bản Gốc Có Lời)</span>
+                                <span class="song-artist">Da LAB • Acoustic V-Pop</span>
+                            </div>
+                            <span class="song-play-icon">▶</span>
+                        </div>
+                        <div class="song-item" data-song="dong-kiem-em" data-file="vu_lalung.mp3">
+                            <span class="song-num">04</span>
+                            <div class="song-details">
+                                <span class="song-title">Đông Kiếm Em 🎙️</span>
+                                <span class="song-artist">Vũ. • Acoustic Romance</span>
+                            </div>
+                            <span class="song-play-icon">▶</span>
+                        </div>
+                    </div>
+
+                    <!-- Song List for M-TP -->
+                    <div class="song-list" id="listMtp">
+                        <div class="song-item active" data-song="hay-trao-cho-anh" data-file="mtp_haytraochoanh.mp3">
+                            <span class="song-num">01</span>
+                            <div class="song-details">
+                                <span class="song-title">Hãy Trao Cho Anh 🎙️ (Bản Gốc Có Lời)</span>
+                                <span class="song-artist">Sơn Tùng M-TP ft. Snoop Dogg</span>
+                            </div>
+                            <span class="song-play-icon">▶</span>
+                        </div>
+                        <div class="song-item" data-song="con-mua-ngang-qua" data-file="mtp_conmuangangqua.mp3">
+                            <span class="song-num">02</span>
+                            <div class="song-details">
+                                <span class="song-title">Cơn Mưa Ngang Qua 🎙️ (Bản Gốc)</span>
+                                <span class="song-artist">Sơn Tùng M-TP • Dance Pop R&B</span>
+                            </div>
+                            <span class="song-play-icon">▶</span>
+                        </div>
+                        <div class="song-item" data-song="con-mua-xa-dan" data-file="mtp_conmuaxadan.mp3">
+                            <span class="song-num">03</span>
+                            <div class="song-details">
+                                <span class="song-title">Cơn Mưa Xa Dần 🎙️ (Bản Gốc)</span>
+                                <span class="song-artist">Sơn Tùng M-TP • Pop Romance</span>
+                            </div>
+                            <span class="song-play-icon">▶</span>
+                        </div>
+                        <div class="song-item" data-song="noi-nay-co-anh" data-file="mtp_haytraochoanh.mp3">
+                            <span class="song-num">04</span>
+                            <div class="song-details">
+                                <span class="song-title">Nơi Này Có Anh 🎙️</span>
+                                <span class="song-artist">Sơn Tùng M-TP • Sweet Love</span>
+                            </div>
+                            <span class="song-play-icon">▶</span>
+                        </div>
+                    </div>
+
+                    <!-- Upload Custom MP3 Button -->
+                    <div class="music-upload-section">
+                        <button id="uploadMusicBtn" class="upload-music-btn">
+                            <span>📁</span> Tải file nhạc MP3 từ máy của bạn
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal Tùy Chỉnh Tên & Ngày Kỷ Niệm (Custom Name & Love Milestone) -->
+        <div id="nameEditorModal" class="letter-modal">
+            <div class="letter-backdrop" id="nameEditorBackdrop"></div>
+            <div class="letter-card name-editor-card">
+                <button class="close-letter-btn" id="closeNameEditorBtn">&times;</button>
+                <div class="letter-header">
+                    <span class="letter-stamp">✍️</span>
+                    <h3>Tùy Chỉnh Kỷ Niệm Tình Yêu</h3>
+                    <p class="letter-date">Lưu giữ khoảnh khắc ngọt ngào của hai bạn 💕</p>
+                </div>
+                <div class="name-editor-form">
+                    <div class="form-group">
+                        <label>👑 Tên của bạn (Người gửi):</label>
+                        <input type="text" id="inputSenderName" value="Mai IT" placeholder="Ví dụ: Mai IT">
+                    </div>
+                    <div class="form-group">
+                        <label>💖 Tên người nhận (Người thương):</label>
+                        <input type="text" id="inputRecipientName" value="Kim Thanh" placeholder="Ví dụ: Kim Thanh">
+                    </div>
+                    <div class="form-group">
+                        <label>⏳ Ngày giờ bắt đầu yêu nhau (13:30 ngày 30/08/2026):</label>
+                        <input type="datetime-local" id="inputLoveDate" value="2026-08-30T13:30">
+                    </div>
+                    <div class="form-group">
+                        <label>💌 Lời nhắn gửi riêng trong bức thư:</label>
+                        <textarea id="inputCustomMessage" rows="3"
+                            placeholder="Nhập lời chúc hoặc tâm tình của bạn..."></textarea>
+                    </div>
+                    <button id="saveNameSettingsBtn" class="save-settings-btn">Lưu Kỷ Niệm ✨</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complete Interactive Guided Tour Overlay (Hệ Thống Hướng Dẫn Tương Tác 14 Bước) -->
+        <div id="tourOverlay" class="tour-overlay">
+            <!-- Spotlight Frame -->
+            <div id="tourSpotlight" class="tour-spotlight">
+                <div class="tour-spotlight-pulse"></div>
+            </div>
+
+            <!-- Bouncing Pointer Arrow -->
+            <div id="tourPointer" class="tour-pointer">👆</div>
+
+            <!-- Floating Tour Dialogue Card -->
+            <div id="tourCard" class="tour-card">
+                <button id="tourCloseBtn" class="tour-close-btn" aria-label="Đóng Hướng Dẫn">&times;</button>
+                <div class="tour-header">
+                    <span id="tourStepBadge" class="tour-step-badge">BƯỚC 1 / 11</span>
+                    <button id="tourVoiceBtn" class="tour-voice-btn" title="Bấm để nghe giọng nói tiếng Việt">🔊 Nghe
+                        Tiếng</button>
+                    <div id="tourDots" class="tour-dots"></div>
+                </div>
+                <h3 id="tourTitle" class="tour-title">💖 Bước 1: Trái Tim 3D</h3>
+                <p id="tourDesc" class="tour-desc">Xin chào Kim Thanh! Chạm vào tim để bùng nổ vũ trụ lung linh nha! ✨
+                </p>
+                <div class="tour-actions">
+                    <button id="tourSkipBtn" class="tour-btn tour-btn-skip">Bỏ qua</button>
+                    <button id="tourPrevBtn" class="tour-btn tour-btn-prev">← Quay lại</button>
+                    <button id="tourNextBtn" class="tour-btn tour-btn-next">Tiếp tục →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Background Music Audio -->
+        <audio id="bgMusic" loop preload="auto" src="vu_lalung.mp3">
+            <source src="vu_lalung.mp3" type="audio/mpeg">
+            <source src="mtp_emcuangayhomqua.mp3" type="audio/mpeg">
+        </audio>
+        <input type="file" id="musicFileInput" accept="audio/*" style="display:none">
+
+        <script src="love.js"></script>
+</body>
+
+</html>
