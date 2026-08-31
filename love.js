@@ -1722,17 +1722,6 @@ function launchHeartFireworks(burstX, burstY, colors = null) {
     }
 }
 
-// Hàm bắn pháo hoa trái tim đại tiệc 10 quả liên hoàn rực rỡ
-function triggerGrandHeartFireworks(count = 10, originX = null, originY = null) {
-    for (let i = 0; i < count; i++) {
-        setTimeout(() => {
-            const bx = originX ? (originX + (Math.random() - 0.5) * 220) : (width * 0.15 + Math.random() * width * 0.7);
-            const by = originY ? (originY + (Math.random() - 0.5) * 160) : (height * 0.14 + Math.random() * height * 0.38);
-            launchHeartFireworks(bx, by);
-        }, i * 210);
-    }
-}
-
 function explodeHeartRocket(rx, ry, colors) {
     if (audioCtx) {
         try {
@@ -1935,19 +1924,21 @@ if (saveNameSettingsBtn) {
         if (nameEditorModal) nameEditorModal.classList.remove("open");
 
         showToastCard("💖 Đã Lưu Kỷ Niệm!", `Tình yêu của ${senderName} & ${recipientName} đã được cập nhật lung linh! ✨`, 5000, `Tình yêu của ${senderName} & ${recipientName} đã được cập nhật lung linh!`, "save_settings.mp3");
-        triggerGrandHeartFireworks(10);
+        launchHeartFireworks();
     });
 }
 
-// Bắn pháo hoa nút trên thanh công cụ và trong hub (10 quả nổ liên hoàn rực rỡ)
+// Bắn pháo hoa nút trên thanh công cụ và trong hub
 const fireworksBtn = document.getElementById("fireworksBtn");
 const hubFireworksBtn = document.getElementById("hubFireworksBtn");
 
 if (fireworksBtn) {
     fireworksBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        triggerGrandHeartFireworks(10);
-        showToastCard("🎆 Đại Tiệc Pháo Hoa Trái Tim (10 Quả)!", "Chúc cho tình cảm của hai bạn mãi rực rỡ và lấp lánh như ngàn vì sao! ✨💖", 6000, "Bùng nổ pháo hoa trái tim! Chúc cho tình cảm của hai bạn mãi rực rỡ và lấp lánh như ngàn vì sao!", "fireworks_story.mp3");
+        launchHeartFireworks();
+        setTimeout(() => launchHeartFireworks(), 260);
+        setTimeout(() => launchHeartFireworks(), 520);
+        showToastCard("🎆 Bùng Nổ Pháo Hoa Trái Tim!", "Chúc cho tình cảm của hai bạn mãi rực rỡ và lấp lánh như ngàn vì sao! ✨💖", 6000, "Bùng nổ pháo hoa trái tim! Chúc cho tình cảm của hai bạn mãi rực rỡ và lấp lánh như ngàn vì sao!", "fireworks_story.mp3");
     });
 }
 
@@ -1955,16 +1946,19 @@ if (hubFireworksBtn) {
     hubFireworksBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         closeControlHub();
-        triggerGrandHeartFireworks(10);
-        showToastCard("🎆 Đại Tiệc Pháo Hoa Trái Tim (10 Quả)!", "Chúc cho tình cảm của hai bạn mãi rực rỡ và lấp lánh như ngàn vì sao! ✨💖", 6000, "Bùng nổ pháo hoa trái tim! Chúc cho tình cảm của hai bạn mãi rực rỡ và lấp lánh như ngàn vì sao!", "fireworks_story.mp3");
+        launchHeartFireworks();
+        setTimeout(() => launchHeartFireworks(), 260);
+        setTimeout(() => launchHeartFireworks(), 520);
+        showToastCard("🎆 Bùng Nổ Pháo Hoa Trái Tim!", "Chúc cho tình cảm của hai bạn mãi rực rỡ và lấp lánh như ngàn vì sao! ✨💖", 6000, "Bùng nổ pháo hoa trái tim! Chúc cho tình cảm của hai bạn mãi rực rỡ và lấp lánh như ngàn vì sao!", "fireworks_story.mp3");
     });
 }
 
-// Click đúp vào canvas để bắn pháo hoa 10 quả
+// Click đúp vào canvas để bắn pháo hoa
 const heartCanvas = document.getElementById("heartCanvas");
 if (heartCanvas) {
     heartCanvas.addEventListener("dblclick", (e) => {
-        triggerGrandHeartFireworks(10, e.clientX, e.clientY);
+        launchHeartFireworks(e.clientX, e.clientY);
+        setTimeout(() => launchHeartFireworks(), 300);
     });
 }
 
