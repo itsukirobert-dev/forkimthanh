@@ -33,10 +33,10 @@ window.addEventListener("resize", resizeCanvas);
 // ==========================================
 const SHAPES = [
     { id: "galaxy", name: "Thiên Hà 3D", icon: "🌌" },
-    { id: "rose", name: "Hoa Hồng", icon: "🌹" },
-    { id: "orb", name: "Quả Cầu", icon: "🔮" },
-    { id: "infinity", name: "Lụa Vô Cực", icon: "♾️" },
-    { id: "glass", name: "Thủy Tinh", icon: "💎" }
+    { id: "flower", name: "Hoa Hồng", icon: "🌸" },
+    { id: "sphere", name: "Quả Cầu", icon: "🔮" },
+    { id: "ribbon", name: "Lụa Vô Cực", icon: "♾️" },
+    { id: "crystal", name: "Pha Lê", icon: "💎" }
 ];
 let currentShapeIdx = 0;
 let curShape = SHAPES[currentShapeIdx];
@@ -55,8 +55,18 @@ const SHAPE_STORIES = {
     crystal: { text: "Khối pha lê trong suốt tỏa sáng tinh khiết và sưởi ấm trái tim bạn!", audio: "shape_crystal.mp3" }
 };
 
+function normalizeShapeId(id) {
+    if (!id) return "galaxy";
+    if (id === "rose") return "flower";
+    if (id === "orb") return "sphere";
+    if (id === "infinity") return "ribbon";
+    if (id === "glass") return "crystal";
+    return id;
+}
+
 function selectShape(shapeId) {
-    const idx = SHAPES.findIndex(s => s.id === shapeId);
+    const targetId = normalizeShapeId(shapeId);
+    const idx = SHAPES.findIndex(s => s.id === targetId);
     if (idx !== -1) {
         currentShapeIdx = idx;
     } else {
@@ -70,7 +80,8 @@ function selectShape(shapeId) {
     if (mobShapeIcon) mobShapeIcon.textContent = curShape.icon;
 
     document.querySelectorAll("#shapeChips .hub-chip").forEach(chip => {
-        if (chip.getAttribute("data-shape") === curShape.id) {
+        const cShape = normalizeShapeId(chip.getAttribute("data-shape"));
+        if (cShape === curShape.id) {
             chip.classList.add("active");
         } else {
             chip.classList.remove("active");
@@ -171,9 +182,9 @@ document.querySelectorAll(".hub-chip[data-bg]").forEach(chip => {
     });
 });
 
-// Hệ thống 160 vì sao và dải xoắn ốc 3D toàn cảnh không gian mượt mà
+// Hệ thống 90 vì sao và dải xoắn ốc 3D toàn cảnh không gian mượt mà
 const bgGalaxyStars = [];
-for (let i = 0; i < 160; i++) {
+for (let i = 0; i < 90; i++) {
     const arm = i % 3;
     const armAngle = (arm * (Math.PI * 2 / 3));
     const dist = Math.pow(Math.random(), 0.55) * 580 + 25;
@@ -208,7 +219,8 @@ function draw3DGalaxyBackground(ctx, now, tiltX, tiltY) {
     ctx.fillStyle = nebGrd;
     ctx.fillRect(0, 0, width, height);
 
-    for (let s of bgGalaxyStars) {
+    for (let i = 0; i < bgGalaxyStars.length; i++) {
+        const s = bgGalaxyStars[i];
         const curAngle = s.baseAngle + rotSpeed * (s.speed * 800);
         const x = Math.cos(curAngle) * s.dist;
         const y = Math.sin(curAngle) * s.dist * 0.52; // Tilted spiral plane
@@ -510,6 +522,60 @@ function resumeMusicAfterVoice(delay = 600) {
     }, delay);
 }
 
+function stopAllVoicesAndDialogues(keepToast = false) {
+    if ('speechSynthesis' in window) {
+        try { window.speechSynthesis.cancel(); } catch (e) { }
+    }
+    if (storyAudio) {
+        try {
+            storyAudio.pause();
+            storyAudio.currentTime = 0;
+        } catch (e) { }
+    }
+    if (tourVoiceAudio) {
+        try {
+            tourVoiceAudio.pause();
+            tourVoiceAudio.currentTime = 0;
+        } catch (e) { }
+    }
+    if (typeof catVoiceAudios === "object" && catVoiceAudios) {
+        Object.values(catVoiceAudios).forEach(a => {
+            if (a) {
+                try {
+                    a.pause();
+                    a.currentTime = 0;
+                } catch (e) { }
+            }
+        });
+    }
+    if (typeof gooseVoiceAudios === "object" && gooseVoiceAudios) {
+        Object.values(gooseVoiceAudios).forEach(a => {
+            if (a) {
+                try {
+                    a.pause();
+                    a.currentTime = 0;
+                } catch (e) { }
+            }
+        });
+    }
+    if (typeof genreAudio !== "undefined" && genreAudio) {
+        try {
+            genreAudio.pause();
+            genreAudio.currentTime = 0;
+        } catch (e) { }
+    }
+    clearTimeout(tourVoiceTimer);
+    clearTimeout(toastBadgeTimeout);
+    isVoiceSpeaking = false;
+
+    if (!keepToast && comboBadge) {
+        comboBadge.classList.remove("active");
+    }
+    document.querySelectorAll(".cat-bubble.active").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".goose-bubble.active").forEach(b => b.classList.remove("active"));
+    resumeMusicAfterVoice(300);
+}
+
 function speakStoryVoice(text, audioFile = "") {
     if (!text && !audioFile) return;
     currentStoryVoiceText = text;
@@ -518,13 +584,15 @@ function speakStoryVoice(text, audioFile = "") {
     // 1. Tắt nhạc nền ngay khi bắt đầu lời kể
     pauseMusicForVoice();
 
-    // Dừng âm thanh giọng đọc trước đó nếu có
+    // Dừng toàn bộ âm thanh giọng đọc trước đó để không bị chồng chéo dính chữ
     if (storyAudio) {
-        storyAudio.pause();
-        storyAudio.currentTime = 0;
+        try {
+            storyAudio.pause();
+            storyAudio.currentTime = 0;
+        } catch (e) { }
     }
     if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
+        try { window.speechSynthesis.cancel(); } catch (e) { }
     }
 
     // 2. Phát file âm thanh MP3 phòng thu Tiếng Việt chuẩn 100%
@@ -587,6 +655,9 @@ function speakFallbackWebSpeech(text) {
 
 function showToastCard(titleHtml, descHtml, duration = 9500, voiceText = "", audioFile = "") {
     if (!comboBadge) return;
+    // Dừng toàn bộ âm thanh và bong bóng thoại trước đó để tránh chồng chéo / dính chữ
+    stopAllVoicesAndDialogues(true);
+
     currentStoryVoiceText = voiceText || descHtml.replace(/<[^>]*>?/gm, '').replace(/["']/g, '');
     currentStoryAudioFile = audioFile;
 
@@ -597,6 +668,7 @@ function showToastCard(titleHtml, descHtml, duration = 9500, voiceText = "", aud
         ${audioFile ? `
         <div class="combo-badge-actions">
             <button class="combo-voice-btn" id="replayStoryVoiceBtn">🔊 Nghe Lời Kể</button>
+            <button class="combo-voice-btn" id="stopStoryVoiceBtn" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);">⏹️ Tắt Tiếng</button>
         </div>` : ''}
     `;
     comboBadge.classList.add("active");
@@ -605,9 +677,15 @@ function showToastCard(titleHtml, descHtml, duration = 9500, voiceText = "", aud
     if (closeBtn) {
         closeBtn.onclick = (e) => {
             e.stopPropagation();
-            comboBadge.classList.remove("active");
-            if (storyAudio) storyAudio.pause();
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            stopAllVoicesAndDialogues(false);
+        };
+    }
+
+    const stopBtn = document.getElementById("stopStoryVoiceBtn");
+    if (stopBtn) {
+        stopBtn.onclick = (e) => {
+            e.stopPropagation();
+            stopAllVoicesAndDialogues(true);
         };
     }
 
@@ -679,58 +757,321 @@ document.querySelectorAll(".hub-chip[data-theme]").forEach(chip => {
 });
 
 // ==========================================
-// 3. BỨC THƯ TÌNH BÍ MẬT (Love Letter Typewriter)
+// 3. HỘP THƯ TÌNH YÊU & LƯU TRỮ LỊCH SỬ THƯ (Love Mailbox & History System)
 // ==========================================
-const letterBtn = document.getElementById("letterBtn");
+let senderName = localStorage.getItem("love_sender_name") || "Mai IT";
+let recipientName = localStorage.getItem("love_recipient_name") || "Kim Thanh";
+let storedDate = localStorage.getItem("love_start_date");
+if (!storedDate || storedDate === "2024-01-01" || storedDate === "2026-08-30") {
+    storedDate = "2026-08-30T13:30";
+    localStorage.setItem("love_start_date", storedDate);
+}
+let loveStartDate = storedDate;
+let customLoveLetter = localStorage.getItem("love_custom_letter") || "";
+
+// Romantic Preset Templates
+const ROMANTIC_TEMPLATES = {
+    morning: {
+        title: "Chào buổi sáng rạng rỡ & ngọt ngào ☀️",
+        mood: "💖",
+        content: `Chào buổi sáng người anh/em yêu nhất! ☀️✨\n\nChúc em/anh một ngày mới thật nhiều năng lượng, làm việc hay học tập thật vui vẻ và luôn giữ nụ cười xinh trên môi nhé. Hãy nhớ là luôn có một người đang rất nhớ và thương em/anh ở đây nha! Yêu em/anh nhiều! 🌸🥰`
+    },
+    night: {
+        title: "Nhớ người thương giữa đêm ngàn sao 🌙",
+        mood: "🌙",
+        content: `Đêm đã khuya rồi, ngoài trời gió mát và muôn ngàn vì sao đang lấp lánh... 🌌\n\nAnh/em chỉ muốn gửi một lời chúc ngủ ngon thật ấm áp đến em/anh. Hãy gạt bỏ hết mọi âu lo, mệt mỏi của ngày hôm nay và có một giấc ngủ thật ngon, mơ về những điều ngọt ngào nhất nhé! Yêu em/anh 3000! 💫❤️`
+    },
+    promise: {
+        title: "Lời hứa & ước hẹn bên nhau trọn đời 💍",
+        mood: "💍",
+        content: `Gửi người đặc biệt nhất trong cuộc đời anh/em... 💖\n\nDù thời gian có trôi qua bao lâu, dù thế giới ngoài kia có đổi thay thế nào, anh/em vẫn luôn hứa sẽ nắm chặt tay em/anh, cùng nhau vượt qua mọi khó khăn và xây đắp một tương lai thật hạnh phúc. Mãi mãi bên nhau nhé! 💍✨`
+    },
+    thanks: {
+        title: "Cảm ơn vì đã luôn ở bên cạnh 🌸",
+        mood: "🌸",
+        content: `Cảm ơn em/anh vì đã bước vào cuộc sống của anh/em, mang đến cho anh/em những nụ cười, sự ấm áp và bình yên.\n\nCó em/anh ở bên cạnh, mỗi ngày bình thường đều trở nên thật kỳ diệu. Cảm ơn em/anh vì tất cả những yêu thương và sự dịu dàng dành cho anh/em! 🌸💖`
+    },
+    sorry: {
+        title: "Lời xin lỗi & dỗ dành người yêu 🥺",
+        mood: "🥺",
+        content: `Anh/em biết hôm nay mình đã làm em/anh buồn một chút rồi... 🥺🐾\n\nAnh/em xin lỗi người yêu nhiều lắm nha! Đừng giận anh/em nữa nhé, cho anh/em xin một cái ôm thật chặt để bù đắp nè. Anh/em thương em/anh nhất trên đời luôn á! Mau cười lên với anh/em nha! 🍓💖`
+    },
+    weekend: {
+        title: "Hẹn hò cuối tuần lãng mạn ☕",
+        mood: "☕",
+        content: `Cuối tuần này mình cùng đi dạo phố, uống trà sữa/cà phê và ăn những món ngon em/anh thích nhé! ☕🍰\n\nChỉ cần được ở bên cạnh em/anh, ngồi ngắm nụ cười của em/anh là mọi muộn phiền đều tan biến hết. Hẹn gặp em/anh cuối tuần này nha! 🛵✨`
+    }
+};
+
+function getDefaultLetters() {
+    const sName = senderName || "Mai IT";
+    const rName = recipientName || "Kim Thanh";
+    const firstContent = customLoveLetter || `Giữa hơn 8 tỷ người trên trái đất và muôn ngàn vì sao trong vũ trụ bao la, gặp được em là điều kỳ diệu và may mắn nhất của ${sName}.\n\nCảm ơn em vì đã đến, mang theo nụ cười rạng rỡ và sưởi ấm thế giới này. Chúc em mỗi ngày đều tràn ngập niềm vui, tiếng cười và luôn luôn hạnh phúc nhé! ❤️`;
+
+    return [
+        {
+            id: "letter_default_1",
+            sender: sName,
+            recipient: rName,
+            title: "Gửi người đặc biệt nhất... ✨",
+            mood: "💖",
+            date: "2026-08-30T13:30",
+            content: firstContent
+        },
+        {
+            id: "letter_default_2",
+            sender: rName,
+            recipient: sName,
+            title: "Hồi đáp: Trái tim em cũng vậy! 🌸",
+            mood: "🌸",
+            date: "2026-08-31T09:15",
+            content: `Nhận được bức thư của anh làm em vui cả ngày luôn á! 🥰\n\nCảm ơn anh vì đã luôn kiên nhẫn, yêu thương và tạo nên những điều lãng mạn ngọt ngào dành riêng cho em. Em cũng mong chúng mình sẽ cùng nhau đi qua thật nhiều mùa hoa, cùng nhau cười và chia sẻ mọi khoảnh khắc trong cuộc sống nhé! 💖✨`
+        },
+        {
+            id: "letter_default_3",
+            sender: sName,
+            recipient: rName,
+            title: "Kỷ niệm ngày bên nhau & Lời hứa tương lai 💍",
+            mood: "✨",
+            date: "2026-09-01T20:00",
+            content: `Mỗi ngày trôi qua có em bên cạnh đều là một ngày tuyệt vời. Dù ngoài kia thế giới có ồn ào hay vội vã thế nào, chỉ cần quay về bên em là bình yên lại ngập tràn.\n\nAnh hứa sẽ luôn là chỗ dựa vững chắc, luôn lắng nghe và yêu thương em hơn mỗi ngày! 🌟🥰`
+        }
+    ];
+}
+
+// Mailbox state
+let loveLetters = [];
+let currentLetterIdx = 0;
+let currentMailboxTab = "read";
+let historyFilterType = "all";
+let historySearchQuery = "";
+let currentComposeMood = "💖";
+
+// DOM Elements
 const letterModal = document.getElementById("letterModal");
+const letterBtn = document.getElementById("letterBtn");
+const topLetterBtn = document.getElementById("topLetterBtn");
 const closeLetterBtn = document.getElementById("closeLetterBtn");
+const letterModalBackdrop = document.getElementById("letterModalBackdrop");
+
+// Reader elements
 const typewriterText = document.getElementById("typewriterText");
+const readerSender = document.getElementById("readerSender");
+const readerRecipient = document.getElementById("readerRecipient");
+const readerMood = document.getElementById("readerMood");
+const readerDate = document.getElementById("readerDate");
+const readerTitle = document.getElementById("readerTitle");
+const readerSignature = document.getElementById("readerSignature");
+const btnVoiceLetter = document.getElementById("btnVoiceLetter");
+const btnReplayTypewriter = document.getElementById("btnReplayTypewriter");
+const btnReplyLetter = document.getElementById("btnReplyLetter");
+const btnEditCurrentLetter = document.getElementById("btnEditCurrentLetter");
+const btnPrevLetter = document.getElementById("btnPrevLetter");
+const btnNextLetter = document.getElementById("btnNextLetter");
+const letterPageIndicator = document.getElementById("letterPageIndicator");
 
-const LOVE_LETTER_CONTENT = `Gửi người đặc biệt nhất... ✨
+// History elements
+const letterHistoryList = document.getElementById("letterHistoryList");
+const letterHistoryBadge = document.getElementById("letterHistoryBadge");
+const letterSearchInput = document.getElementById("letterSearchInput");
+const btnNewLetterFromHistory = document.getElementById("btnNewLetterFromHistory");
+const filterAllLetters = document.getElementById("filterAllLetters");
+const filterSenderLetters = document.getElementById("filterSenderLetters");
+const filterRecipientLetters = document.getElementById("filterRecipientLetters");
+const countAllLetters = document.getElementById("countAllLetters");
+const countSenderLetters = document.getElementById("countSenderLetters");
+const countRecipientLetters = document.getElementById("countRecipientLetters");
+const filterSenderName = document.getElementById("filterSenderName");
+const filterRecipientName = document.getElementById("filterRecipientName");
 
-Giữa hơn 8 tỷ người trên trái đất và muôn ngàn vì sao trong vũ trụ bao la, gặp được em là điều kỳ diệu và may mắn nhất của tôi.
+// Compose elements
+const composeFormTitle = document.getElementById("composeFormTitle");
+const inputLetterEditId = document.getElementById("inputLetterEditId");
+const senderChoiceRow = document.getElementById("senderChoiceRow");
+const recipientChoiceRow = document.getElementById("recipientChoiceRow");
+const inputCustomSender = document.getElementById("inputCustomSender");
+const inputCustomRecipient = document.getElementById("inputCustomRecipient");
+const moodSelectorRow = document.getElementById("moodSelectorRow");
+const letterTemplateSelect = document.getElementById("letterTemplateSelect");
+const inputLetterTitle = document.getElementById("inputLetterTitle");
+const inputLetterBody = document.getElementById("inputLetterBody");
+const inputLetterDate = document.getElementById("inputLetterDate");
+const letterCharCounter = document.getElementById("letterCharCounter");
+const btnSaveLetter = document.getElementById("btnSaveLetter");
+const saveLetterBtnIcon = document.getElementById("saveLetterBtnIcon");
+const saveLetterBtnText = document.getElementById("saveLetterBtnText");
+const btnCancelEditLetter = document.getElementById("btnCancelEditLetter");
 
-Cảm ơn em vì đã đến, mang theo nụ cười rạng rỡ và sưởi ấm thế giới này. Chúc em mỗi ngày đều tràn ngập niềm vui, tiếng cười và luôn luôn hạnh phúc nhé! ❤️`;
+// Guide & Sync elements
+const btnCopySyncCode = document.getElementById("btnCopySyncCode");
+const inputSyncCode = document.getElementById("inputSyncCode");
+const btnImportSyncCode = document.getElementById("btnImportSyncCode");
+const btnExportJson = document.getElementById("btnExportJson");
+const btnTriggerImportJson = document.getElementById("btnTriggerImportJson");
+const fileImportJson = document.getElementById("fileImportJson");
+const btnResetDefaultLetters = document.getElementById("btnResetDefaultLetters");
 
 let typewriterInterval = null;
 let letterAudio = new Audio("love_letter.mp3");
+let isVoiceReadingLetter = false;
 
-function openLoveLetter() {
-    if (!letterModal) return;
-    letterModal.classList.add("open");
-
-    // Tắt nhạc nền khi mở thư tình có lời kể
-    pauseMusicForVoice();
-    isVoiceSpeaking = true;
-
+function loadLoveLetters() {
     try {
-        letterAudio.currentTime = 0;
-        letterAudio.volume = 1.0;
-        letterAudio.onended = () => {
-            isVoiceSpeaking = false;
-            resumeMusicAfterVoice(600);
-        };
-        letterAudio.play().catch(() => { });
+        const raw = localStorage.getItem("love_letter_history");
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                loveLetters = parsed;
+                updateLetterHistoryBadge();
+                return;
+            }
+        }
     } catch (e) { }
 
-    const letterContent = customLoveLetter || `Gửi ${recipientName}, người đặc biệt nhất... ✨
+    loveLetters = getDefaultLetters();
+    saveLoveLetters(loveLetters);
+}
 
-Giữa hơn 8 tỷ người trên trái đất và muôn ngàn vì sao trong vũ trụ bao la, gặp được em là điều kỳ diệu và may mắn nhất của ${senderName}.
+function saveLoveLetters(letters) {
+    loveLetters = letters;
+    try {
+        localStorage.setItem("love_letter_history", JSON.stringify(letters));
+    } catch (e) { }
+    updateLetterHistoryBadge();
+}
 
-Cảm ơn em vì đã đến, mang theo nụ cười rạng rỡ và sưởi ấm thế giới này. Chúc em mỗi ngày đều tràn ngập niềm vui, tiếng cười và luôn luôn hạnh phúc nhé! ❤️`;
+function updateLetterHistoryBadge() {
+    if (letterHistoryBadge) {
+        letterHistoryBadge.textContent = (loveLetters && loveLetters.length) || 0;
+    }
+}
 
+function formatLetterDate(dateStr) {
+    if (!dateStr) return "";
+    try {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        const day = String(d.getDate()).padStart(2, "0");
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const year = d.getFullYear();
+        const hours = String(d.getHours()).padStart(2, "0");
+        const mins = String(d.getMinutes()).padStart(2, "0");
+        return `${hours}:${mins} • ${day}/${month}/${year}`;
+    } catch (e) {
+        return dateStr;
+    }
+}
+
+function encodeSyncCode(data) {
+    const jsonStr = JSON.stringify(data);
+    return btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+        return String.fromCharCode('0x' + p1);
+    }));
+}
+
+function decodeSyncCode(code) {
+    const decoded = decodeURIComponent(Array.prototype.map.call(atob(code.trim()), (c) => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(decoded);
+}
+
+function switchLetterTab(tabName) {
+    currentMailboxTab = tabName;
+    document.querySelectorAll(".letter-nav-tab").forEach(tab => {
+        if (tab.getAttribute("data-tab") === tabName) {
+            tab.classList.add("active");
+            tab.setAttribute("aria-selected", "true");
+        } else {
+            tab.classList.remove("active");
+            tab.setAttribute("aria-selected", "false");
+        }
+    });
+
+    document.querySelectorAll(".letter-pane").forEach(pane => {
+        pane.classList.remove("active");
+    });
+
+    const targetPane = document.getElementById("paneLetter" + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+    if (targetPane) {
+        targetPane.classList.add("active");
+    }
+
+    if (tabName === "read") {
+        displayLetter(currentLetterIdx, true);
+    } else if (tabName === "history") {
+        renderLetterHistory(historySearchQuery, historyFilterType);
+    } else if (tabName === "compose") {
+        if (!inputLetterEditId || !inputLetterEditId.value) {
+            setupComposeFormDefaults();
+        }
+    }
+}
+
+function displayLetter(idxOrId, shouldTypewrite = true) {
+    if (!loveLetters || loveLetters.length === 0) {
+        loadLoveLetters();
+    }
+    let idx = 0;
+    if (typeof idxOrId === "number") {
+        idx = Math.max(0, Math.min(idxOrId, loveLetters.length - 1));
+    } else if (typeof idxOrId === "string") {
+        const found = loveLetters.findIndex(l => l.id === idxOrId);
+        idx = found !== -1 ? found : 0;
+    }
+    currentLetterIdx = idx;
+    const letter = loveLetters[idx];
+    if (!letter) return;
+
+    if (readerSender) readerSender.textContent = letter.sender || senderName;
+    if (readerRecipient) readerRecipient.textContent = letter.recipient || recipientName;
+    if (readerMood) readerMood.textContent = letter.mood || "💖";
+    if (readerDate) readerDate.textContent = formatLetterDate(letter.date);
+    if (readerTitle) readerTitle.textContent = letter.title || "Gửi Người Đặc Biệt Nhất... ✨";
+    if (readerSignature) readerSignature.textContent = `Forever With Love ❤️ • ${letter.sender || senderName}`;
+
+    if (letterPageIndicator) {
+        letterPageIndicator.textContent = `Thư ${idx + 1} / ${loveLetters.length}`;
+    }
+    if (btnPrevLetter) btnPrevLetter.disabled = idx === 0;
+    if (btnNextLetter) btnNextLetter.disabled = idx >= loveLetters.length - 1;
+
+    const letterContent = letter.content || "";
     if (typewriterText) {
         typewriterText.textContent = "";
-        let charIndex = 0;
         clearInterval(typewriterInterval);
-        typewriterInterval = setInterval(() => {
-            if (charIndex < letterContent.length) {
-                typewriterText.textContent += letterContent[charIndex];
-                charIndex++;
-            } else {
-                clearInterval(typewriterInterval);
-            }
-        }, 32);
+
+        if (shouldTypewrite) {
+            let charIndex = 0;
+            const speed = letterContent.length > 350 ? 18 : 28;
+            typewriterInterval = setInterval(() => {
+                if (charIndex < letterContent.length) {
+                    typewriterText.textContent += letterContent[charIndex];
+                    charIndex++;
+                } else {
+                    clearInterval(typewriterInterval);
+                }
+            }, speed);
+        } else {
+            typewriterText.textContent = letterContent;
+        }
+    }
+}
+
+function openLoveLetter(letterIdOrTab) {
+    if (!letterModal) return;
+    loadLoveLetters();
+    letterModal.classList.add("open");
+    pauseMusicForVoice();
+
+    if (letterIdOrTab === "history" || letterIdOrTab === "compose" || letterIdOrTab === "guide") {
+        switchLetterTab(letterIdOrTab);
+    } else if (typeof letterIdOrTab === "string" && letterIdOrTab.startsWith("letter_")) {
+        const idx = loveLetters.findIndex(l => l.id === letterIdOrTab);
+        if (idx !== -1) currentLetterIdx = idx;
+        switchLetterTab("read");
+    } else {
+        switchLetterTab("read");
     }
 }
 
@@ -742,23 +1083,759 @@ function closeLoveLetter() {
         letterAudio.pause();
         letterAudio.currentTime = 0;
     }
-    isVoiceSpeaking = false;
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+    isVoiceReadingLetter = false;
+    updateVoiceButtonState();
     resumeMusicAfterVoice(400);
 }
 
+function renderLetterHistory(query = "", filter = "all") {
+    if (!letterHistoryList) return;
+    historySearchQuery = (query || "").trim().toLowerCase();
+    historyFilterType = filter || "all";
+
+    const sName = (senderName || "Mai IT").toLowerCase();
+    const rName = (recipientName || "Kim Thanh").toLowerCase();
+
+    const filtered = loveLetters.filter(letter => {
+        const matchesQuery = !historySearchQuery ||
+            (letter.title && letter.title.toLowerCase().includes(historySearchQuery)) ||
+            (letter.content && letter.content.toLowerCase().includes(historySearchQuery)) ||
+            (letter.sender && letter.sender.toLowerCase().includes(historySearchQuery)) ||
+            (letter.recipient && letter.recipient.toLowerCase().includes(historySearchQuery));
+
+        if (!matchesQuery) return false;
+
+        if (historyFilterType === "sender") {
+            return (letter.sender || "").toLowerCase().includes(sName);
+        } else if (historyFilterType === "recipient") {
+            return (letter.sender || "").toLowerCase().includes(rName);
+        }
+        return true;
+    });
+
+    if (countAllLetters) countAllLetters.textContent = loveLetters.length;
+    if (letterHistoryBadge) letterHistoryBadge.textContent = loveLetters.length;
+
+    const senderCount = loveLetters.filter(l => (l.sender || "").toLowerCase().includes(sName)).length;
+    const recipientCount = loveLetters.filter(l => (l.sender || "").toLowerCase().includes(rName)).length;
+    if (countSenderLetters) countSenderLetters.textContent = senderCount;
+    if (countRecipientLetters) countRecipientLetters.textContent = recipientCount;
+    if (filterSenderName) filterSenderName.textContent = senderName || "Mai IT";
+    if (filterRecipientName) filterRecipientName.textContent = recipientName || "Kim Thanh";
+
+    if (filtered.length === 0) {
+        letterHistoryList.innerHTML = `
+            <div class="history-empty-state">
+                <div class="empty-icon">💌</div>
+                <p><b>Không tìm thấy bức thư nào!</b></p>
+                <p style="font-size:0.8rem;opacity:0.8;">Hãy viết thêm một bức thư ngọt ngào gửi gắm tâm tư nhé 💕</p>
+            </div>
+        `;
+        return;
+    }
+
+    letterHistoryList.innerHTML = filtered.map((item) => {
+        const isFromSender = (item.sender || "").toLowerCase().includes(sName);
+        const senderBadgeClass = isFromSender ? "sender-badge" : "recipient-badge";
+        const senderIcon = isFromSender ? "👑" : "💖";
+        const cleanSnippet = (item.content || "").replace(/\n+/g, " ");
+
+        return `
+            <div class="history-card-item" data-id="${item.id}">
+                <div class="history-card-header">
+                    <div class="history-card-routes">
+                        <span class="${senderBadgeClass}">${senderIcon} <b>${item.sender || 'Người gửi'}</b></span>
+                        <span class="route-arrow">➔</span>
+                        <span><b>${item.recipient || 'Người nhận'}</b></span>
+                    </div>
+                    <span class="history-card-mood">${item.mood || '💖'}</span>
+                </div>
+                <h4 class="history-card-title">${item.title || 'Bức Thư Tình Yêu'}</h4>
+                <p class="history-card-snippet">${cleanSnippet}</p>
+                <div class="history-card-footer">
+                    <span class="history-card-date">⏳ ${formatLetterDate(item.date)}</span>
+                    <div class="history-card-actions">
+                        <button class="history-icon-btn read-btn" data-id="${item.id}" title="Đọc thư">📖 Đọc</button>
+                        <button class="history-icon-btn edit-btn" data-id="${item.id}" title="Sửa thư">✏️ Sửa</button>
+                        <button class="history-icon-btn copy-btn" data-id="${item.id}" title="Sao chép nội dung">📋 Chép</button>
+                        <button class="history-icon-btn delete-btn delete" data-id="${item.id}" title="Xóa thư">🗑️</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    letterHistoryList.querySelectorAll(".history-card-item").forEach(card => {
+        card.addEventListener("click", (e) => {
+            if (e.target.closest(".history-card-actions")) return;
+            const letterId = card.getAttribute("data-id");
+            openLoveLetter(letterId);
+        });
+    });
+
+    letterHistoryList.querySelectorAll(".read-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const letterId = btn.getAttribute("data-id");
+            openLoveLetter(letterId);
+        });
+    });
+
+    letterHistoryList.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const letterId = btn.getAttribute("data-id");
+            startEditLetter(letterId);
+        });
+    });
+
+    letterHistoryList.querySelectorAll(".copy-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const letterId = btn.getAttribute("data-id");
+            copyLetterContent(letterId);
+        });
+    });
+
+    letterHistoryList.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const letterId = btn.getAttribute("data-id");
+            deleteLetter(letterId);
+        });
+    });
+}
+
+function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function copyLetterContent(letterId) {
+    const targetLetter = loveLetters.find(l => l.id === letterId);
+    if (targetLetter) {
+        const fullText = `💌 [${targetLetter.title}]\nTừ: ${targetLetter.sender} ➔ Gửi: ${targetLetter.recipient}\nNgày: ${formatLetterDate(targetLetter.date)}\n\n${targetLetter.content}`;
+        navigator.clipboard.writeText(fullText).then(() => {
+            showToastCard("📋 Đã Sao Chép!", "Nội dung bức thư đã được sao chép vào clipboard! ✨", 3500);
+        }).catch(() => { });
+    }
+}
+
+function setupSenderRecipientChoices(currSender, currRecipient) {
+    const sName = senderName || "Mai IT";
+    const rName = recipientName || "Kim Thanh";
+
+    const effectiveSender = currSender || sName;
+    const effectiveRecipient = currRecipient || rName;
+
+    if (senderChoiceRow) {
+        senderChoiceRow.innerHTML = `
+            <button type="button" class="choice-chip ${effectiveSender === sName ? 'active' : ''}" data-role="sender" data-val="${sName}">👑 ${sName}</button>
+            <button type="button" class="choice-chip ${effectiveSender === rName ? 'active' : ''}" data-role="sender" data-val="${rName}">💖 ${rName}</button>
+            <button type="button" class="choice-chip ${effectiveSender !== sName && effectiveSender !== rName ? 'active' : ''}" data-role="sender" data-val="__custom__">✍️ Tùy chọn...</button>
+        `;
+
+        senderChoiceRow.querySelectorAll(".choice-chip").forEach(chip => {
+            chip.addEventListener("click", () => {
+                senderChoiceRow.querySelectorAll(".choice-chip").forEach(c => c.classList.remove("active"));
+                chip.classList.add("active");
+                const val = chip.getAttribute("data-val");
+                if (val === "__custom__") {
+                    if (inputCustomSender) {
+                        inputCustomSender.style.display = "block";
+                        inputCustomSender.focus();
+                    }
+                } else {
+                    if (inputCustomSender) inputCustomSender.style.display = "none";
+                }
+            });
+        });
+    }
+
+    if (inputCustomSender) {
+        if (effectiveSender !== sName && effectiveSender !== rName) {
+            inputCustomSender.style.display = "block";
+            inputCustomSender.value = effectiveSender;
+        } else {
+            inputCustomSender.style.display = "none";
+            inputCustomSender.value = "";
+        }
+    }
+
+    if (recipientChoiceRow) {
+        recipientChoiceRow.innerHTML = `
+            <button type="button" class="choice-chip ${effectiveRecipient === rName ? 'active' : ''}" data-role="recipient" data-val="${rName}">💖 ${rName}</button>
+            <button type="button" class="choice-chip ${effectiveRecipient === sName ? 'active' : ''}" data-role="recipient" data-val="${sName}">👑 ${sName}</button>
+            <button type="button" class="choice-chip ${effectiveRecipient !== sName && effectiveRecipient !== rName ? 'active' : ''}" data-role="recipient" data-val="__custom__">✍️ Tùy chọn...</button>
+        `;
+
+        recipientChoiceRow.querySelectorAll(".choice-chip").forEach(chip => {
+            chip.addEventListener("click", () => {
+                recipientChoiceRow.querySelectorAll(".choice-chip").forEach(c => c.classList.remove("active"));
+                chip.classList.add("active");
+                const val = chip.getAttribute("data-val");
+                if (val === "__custom__") {
+                    if (inputCustomRecipient) {
+                        inputCustomRecipient.style.display = "block";
+                        inputCustomRecipient.focus();
+                    }
+                } else {
+                    if (inputCustomRecipient) inputCustomRecipient.style.display = "none";
+                }
+            });
+        });
+    }
+
+    if (inputCustomRecipient) {
+        if (effectiveRecipient !== sName && effectiveRecipient !== rName) {
+            inputCustomRecipient.style.display = "block";
+            inputCustomRecipient.value = effectiveRecipient;
+        } else {
+            inputCustomRecipient.style.display = "none";
+            inputCustomRecipient.value = "";
+        }
+    }
+}
+
+function updateMoodSelectorUI() {
+    if (!moodSelectorRow) return;
+    moodSelectorRow.querySelectorAll(".mood-chip").forEach(chip => {
+        if (chip.getAttribute("data-mood") === currentComposeMood) {
+            chip.classList.add("active");
+        } else {
+            chip.classList.remove("active");
+        }
+    });
+}
+
+function updateCharCounter() {
+    if (letterCharCounter && inputLetterBody) {
+        const count = inputLetterBody.value.length;
+        letterCharCounter.textContent = `${count} ký tự`;
+    }
+}
+
+function resetComposeForm() {
+    if (inputLetterEditId) inputLetterEditId.value = "";
+    if (composeFormTitle) composeFormTitle.textContent = "✍️ Viết Bức Thư Tình Mới";
+    if (saveLetterBtnIcon) saveLetterBtnIcon.textContent = "💌";
+    if (saveLetterBtnText) saveLetterBtnText.textContent = "Lưu & Gửi Vào Hộp Thư";
+    if (inputLetterTitle) inputLetterTitle.value = "";
+    if (inputLetterBody) inputLetterBody.value = "";
+    if (letterTemplateSelect) letterTemplateSelect.value = "";
+    currentComposeMood = "💖";
+    updateMoodSelectorUI();
+    updateCharCounter();
+    setupSenderRecipientChoices(senderName, recipientName);
+    if (inputLetterDate) {
+        inputLetterDate.value = new Date().toISOString().slice(0, 16);
+    }
+}
+
+function setupComposeFormDefaults() {
+    resetComposeForm();
+}
+
+function startEditLetter(letterId) {
+    const letter = loveLetters.find(l => l.id === letterId);
+    if (!letter) return;
+
+    if (inputLetterEditId) inputLetterEditId.value = letter.id;
+    if (composeFormTitle) composeFormTitle.textContent = "✏️ Chỉnh Sửa Bức Thư";
+    if (saveLetterBtnIcon) saveLetterBtnIcon.textContent = "💾";
+    if (saveLetterBtnText) saveLetterBtnText.textContent = "Cập Nhật Bức Thư";
+
+    if (inputLetterTitle) inputLetterTitle.value = letter.title || "";
+    if (inputLetterBody) inputLetterBody.value = letter.content || "";
+    if (inputLetterDate) inputLetterDate.value = letter.date || new Date().toISOString().slice(0, 16);
+    updateCharCounter();
+
+    currentComposeMood = letter.mood || "💖";
+    updateMoodSelectorUI();
+    setupSenderRecipientChoices(letter.sender, letter.recipient);
+
+    switchLetterTab("compose");
+}
+
+function deleteLetter(letterId) {
+    if (loveLetters.length <= 1) {
+        showToastCard("⚠️ Không Thể Xóa", "Hộp thư cần giữ ít nhất 1 bức thư kỷ niệm nhé! 💕", 4000);
+        return;
+    }
+    const idx = loveLetters.findIndex(l => l.id === letterId);
+    if (idx === -1) return;
+
+    const title = loveLetters[idx].title || "Bức thư";
+    loveLetters.splice(idx, 1);
+    saveLoveLetters(loveLetters);
+    renderLetterHistory(historySearchQuery, historyFilterType);
+    showToastCard("🗑️ Đã Xóa Bức Thư", `"${title}" đã được xóa khỏi hộp lưu trữ.`, 3500);
+}
+
+function handleReplyLetter() {
+    const currentLetter = loveLetters[currentLetterIdx] || loveLetters[0];
+    if (!currentLetter) return;
+
+    resetComposeForm();
+
+    if (composeFormTitle) composeFormTitle.textContent = "💬 Hồi Đáp Bức Thư";
+    if (saveLetterBtnIcon) saveLetterBtnIcon.textContent = "💌";
+    if (saveLetterBtnText) saveLetterBtnText.textContent = "Gửi Lời Hồi Đáp";
+
+    const replySender = currentLetter.recipient || recipientName || "Kim Thanh";
+    const replyRecipient = currentLetter.sender || senderName || "Mai IT";
+    setupSenderRecipientChoices(replySender, replyRecipient);
+
+    const prevTitle = currentLetter.title || "";
+    if (inputLetterTitle) {
+        inputLetterTitle.value = prevTitle.startsWith("Re:") ? prevTitle : `Re: ${prevTitle}`;
+    }
+
+    if (inputLetterDate) {
+        inputLetterDate.value = new Date().toISOString().slice(0, 16);
+    }
+
+    switchLetterTab("compose");
+    if (inputLetterBody) inputLetterBody.focus();
+}
+
+function saveLetterForm() {
+    let chosenSender = senderName || "Mai IT";
+    const activeSenderChip = senderChoiceRow ? senderChoiceRow.querySelector(".choice-chip.active") : null;
+    if (activeSenderChip) {
+        const val = activeSenderChip.getAttribute("data-val");
+        if (val === "__custom__") {
+            chosenSender = (inputCustomSender && inputCustomSender.value.trim()) || chosenSender;
+        } else {
+            chosenSender = val;
+        }
+    }
+
+    let chosenRecipient = recipientName || "Kim Thanh";
+    const activeRecipientChip = recipientChoiceRow ? recipientChoiceRow.querySelector(".choice-chip.active") : null;
+    if (activeRecipientChip) {
+        const val = activeRecipientChip.getAttribute("data-val");
+        if (val === "__custom__") {
+            chosenRecipient = (inputCustomRecipient && inputCustomRecipient.value.trim()) || chosenRecipient;
+        } else {
+            chosenRecipient = val;
+        }
+    }
+
+    const title = (inputLetterTitle && inputLetterTitle.value.trim()) || "Bức Thư Tình Cảm ✨";
+    const content = (inputLetterBody && inputLetterBody.value.trim()) || "";
+    const dateVal = (inputLetterDate && inputLetterDate.value) || new Date().toISOString().slice(0, 16);
+
+    if (!content) {
+        showToastCard("✍️ Hãy Viết Tâm Tư", "Nội dung bức thư không được để trống nha! 💕", 3500);
+        if (inputLetterBody) inputLetterBody.focus();
+        return;
+    }
+
+    const editId = inputLetterEditId ? inputLetterEditId.value : "";
+    if (editId) {
+        const idx = loveLetters.findIndex(l => l.id === editId);
+        if (idx !== -1) {
+            loveLetters[idx].sender = chosenSender;
+            loveLetters[idx].recipient = chosenRecipient;
+            loveLetters[idx].title = title;
+            loveLetters[idx].content = content;
+            loveLetters[idx].mood = currentComposeMood;
+            loveLetters[idx].date = dateVal;
+            saveLoveLetters(loveLetters);
+            currentLetterIdx = idx;
+            showToastCard("✨ Đã Cập Nhật Thư!", `Bức thư "${title}" đã được lưu lại thành công! 💖`, 4500);
+        }
+    } else {
+        const newLetter = {
+            id: "letter_" + Date.now(),
+            sender: chosenSender,
+            recipient: chosenRecipient,
+            title: title,
+            content: content,
+            mood: currentComposeMood,
+            date: dateVal
+        };
+        loveLetters.unshift(newLetter);
+        saveLoveLetters(loveLetters);
+        currentLetterIdx = 0;
+        showToastCard("💌 Đã Gửi Vào Hộp Thư!", `Bức thư gửi đến ${chosenRecipient} đã được lưu vào kỷ niệm! ✨`, 5000, "Đã gửi vào hộp thư tình yêu!");
+        launchHeartFireworks();
+    }
+
+    resetComposeForm();
+    switchLetterTab("read");
+}
+
+function speakLetterVoice() {
+    if (isVoiceReadingLetter) {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        if (letterAudio) {
+            letterAudio.pause();
+            letterAudio.currentTime = 0;
+        }
+        isVoiceReadingLetter = false;
+        updateVoiceButtonState();
+        resumeMusicAfterVoice(400);
+        return;
+    }
+
+    const currentLetter = loveLetters[currentLetterIdx] || loveLetters[0];
+    if (!currentLetter) return;
+
+    pauseMusicForVoice();
+    isVoiceReadingLetter = true;
+    updateVoiceButtonState();
+
+    const voiceText = `${currentLetter.title}. Từ ${currentLetter.sender} gửi ${currentLetter.recipient}. ${currentLetter.content}`;
+
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(voiceText);
+        utterance.lang = "vi-VN";
+        utterance.rate = 0.92;
+        utterance.pitch = 1.05;
+
+        utterance.onend = () => {
+            isVoiceReadingLetter = false;
+            updateVoiceButtonState();
+            resumeMusicAfterVoice(600);
+        };
+        utterance.onerror = () => {
+            isVoiceReadingLetter = false;
+            updateVoiceButtonState();
+            resumeMusicAfterVoice(400);
+        };
+
+        const voices = window.speechSynthesis.getVoices();
+        const viVoice = voices.find(v => v.lang && v.lang.toLowerCase().includes("vi"));
+        if (viVoice) utterance.voice = viVoice;
+
+        window.speechSynthesis.speak(utterance);
+    } else {
+        try {
+            letterAudio.currentTime = 0;
+            letterAudio.volume = 1.0;
+            letterAudio.onended = () => {
+                isVoiceReadingLetter = false;
+                updateVoiceButtonState();
+                resumeMusicAfterVoice(600);
+            };
+            letterAudio.play().catch(() => {
+                isVoiceReadingLetter = false;
+                updateVoiceButtonState();
+                resumeMusicAfterVoice(400);
+            });
+        } catch (e) {
+            isVoiceReadingLetter = false;
+            updateVoiceButtonState();
+            resumeMusicAfterVoice(400);
+        }
+    }
+}
+
+function updateVoiceButtonState() {
+    if (!btnVoiceLetter) return;
+    if (isVoiceReadingLetter) {
+        btnVoiceLetter.innerHTML = `<span class="btn-icon">⏹</span> <span class="btn-text">Dừng Đọc</span>`;
+        btnVoiceLetter.style.background = "rgba(244, 67, 54, 0.4)";
+    } else {
+        btnVoiceLetter.innerHTML = `<span class="btn-icon">🔊</span> <span class="btn-text">Nghe Đọc Thư</span>`;
+        btnVoiceLetter.style.background = "";
+    }
+}
+
+function copySyncCodeToClipboard() {
+    try {
+        const code = encodeSyncCode(loveLetters);
+        navigator.clipboard.writeText(code).then(() => {
+            showToastCard("📋 Đã Sao Chép Mã Đồng Bộ!", "Gửi chuỗi mã này cho người yêu qua Zalo/Messenger để đồng bộ lịch sử thư nhé! ✨", 5500);
+        }).catch(() => {
+            prompt("Sao chép mã đồng bộ thư dưới đây:", code);
+        });
+    } catch (e) {
+        showToastCard("⚠️ Lỗi sao chép", "Không thể tạo mã: " + e.message, 4000);
+    }
+}
+
+function importSyncCodeFromInput() {
+    if (!inputSyncCode) return;
+    const raw = inputSyncCode.value.trim();
+    if (!raw) {
+        showToastCard("⚠️ Chưa Nhập Mã", "Vui lòng dán chuỗi mã đồng bộ từ người yêu vào ô nhé! 💕", 3500);
+        inputSyncCode.focus();
+        return;
+    }
+
+    try {
+        let imported = null;
+        if (raw.startsWith("[") || raw.startsWith("{")) {
+            imported = JSON.parse(raw);
+        } else {
+            imported = decodeSyncCode(raw);
+        }
+
+        if (Array.isArray(imported) && imported.length > 0) {
+            loveLetters = imported;
+            saveLoveLetters(loveLetters);
+            inputSyncCode.value = "";
+            renderLetterHistory(historySearchQuery, historyFilterType);
+            displayLetter(0, true);
+            showToastCard("🎉 Đồng Bộ Thành Công!", `Đã cập nhật ${loveLetters.length} bức thư từ người yêu vào hộp thư! 💖`, 6000, "Đồng bộ thư tình thành công!");
+            launchHeartFireworks();
+            switchLetterTab("history");
+        } else {
+            showToastCard("⚠️ Mã Không Hợp Lệ", "Dữ liệu mã đồng bộ không đúng định dạng thư tình.", 4000);
+        }
+    } catch (e) {
+        showToastCard("⚠️ Lỗi Nhập Mã", "Mã đồng bộ bị lỗi: " + e.message, 4500);
+    }
+}
+
+function exportJsonBackup() {
+    try {
+        const jsonStr = JSON.stringify(loveLetters, null, 2);
+        const blob = new Blob([jsonStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `hop_thu_tinh_yeu_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToastCard("📁 Đã Tải File Sao Lưu!", "File JSON chứa toàn bộ lịch sử thư đã được lưu về máy! ✨", 4500);
+    } catch (e) {
+        showToastCard("⚠️ Lỗi Xuất File", e.message, 3500);
+    }
+}
+
+function importJsonFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (Array.isArray(data) && data.length > 0) {
+                loveLetters = data;
+                saveLoveLetters(loveLetters);
+                renderLetterHistory(historySearchQuery, historyFilterType);
+                displayLetter(0, true);
+                showToastCard("📂 Đã Khôi Phục File Thư!", `Đã tải thành công ${data.length} bức thư từ file sao lưu! 💖`, 5000);
+                switchLetterTab("history");
+            } else {
+                showToastCard("⚠️ File Không Hợp Lệ", "File JSON không chứa danh sách thư hợp lệ.", 4000);
+            }
+        } catch (err) {
+            showToastCard("⚠️ Lỗi Đọc File", "Không thể đọc file: " + err.message, 4000);
+        }
+    };
+    reader.readAsText(file);
+}
+
+function resetDefaultLettersList() {
+    if (confirm("Bạn có chắc chắn muốn khôi phục lại 3 bức thư mẫu ban đầu không? (Lịch sử hiện tại sẽ được nạp lại các thư mẫu gốc)")) {
+        loveLetters = getDefaultLetters();
+        saveLoveLetters(loveLetters);
+        renderLetterHistory(historySearchQuery, historyFilterType);
+        displayLetter(0, true);
+        showToastCard("🔄 Đã Khôi Phục Thư Mẫu!", "Hộp thư đã được nạp lại 3 bức thư mẫu ban đầu. 🌸", 4000);
+        switchLetterTab("read");
+    }
+}
+
+function syncLoveLetterNames() {
+    if (filterSenderName) filterSenderName.textContent = senderName || "Mai IT";
+    if (filterRecipientName) filterRecipientName.textContent = recipientName || "Kim Thanh";
+    setupSenderRecipientChoices(senderName, recipientName);
+    renderLetterHistory(historySearchQuery, historyFilterType);
+    if (loveLetters && loveLetters.length > 0) {
+        displayLetter(currentLetterIdx, false);
+    }
+}
+
+// Window attachments for inline event handlers
+window.switchLetterTab = switchLetterTab;
+window.startEditLetter = startEditLetter;
+window.copyLetterContent = copyLetterContent;
+window.deleteLetter = deleteLetter;
+window.openLoveLetter = openLoveLetter;
+window.closeLoveLetter = closeLoveLetter;
+
+// Attach Event Listeners for Letter Modal
 if (letterBtn) letterBtn.addEventListener("click", (e) => { e.stopPropagation(); openLoveLetter(); });
+if (topLetterBtn) topLetterBtn.addEventListener("click", (e) => { e.stopPropagation(); closeHeartMenu(); openLoveLetter(); });
 if (closeLetterBtn) closeLetterBtn.addEventListener("click", (e) => { e.stopPropagation(); closeLoveLetter(); });
+if (letterModalBackdrop) letterModalBackdrop.addEventListener("click", (e) => { e.stopPropagation(); closeLoveLetter(); });
 if (letterModal) {
     letterModal.addEventListener("click", (e) => {
         if (e.target === letterModal) closeLoveLetter();
     });
 }
-window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-        closeLoveLetter();
-        closeAuthorModal();
-    }
+
+// Tab navigation listeners for Letter Modal
+document.querySelectorAll("#letterModal .letter-nav-tab").forEach(tab => {
+    tab.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const targetTab = tab.getAttribute("data-tab");
+        switchLetterTab(targetTab);
+    });
 });
+
+// Reader toolbar listeners
+if (btnVoiceLetter) btnVoiceLetter.addEventListener("click", (e) => { e.stopPropagation(); speakLetterVoice(); });
+if (btnReplayTypewriter) btnReplayTypewriter.addEventListener("click", (e) => { e.stopPropagation(); displayLetter(currentLetterIdx, true); });
+if (btnReplyLetter) btnReplyLetter.addEventListener("click", (e) => { e.stopPropagation(); handleReplyLetter(); });
+if (btnEditCurrentLetter) {
+    btnEditCurrentLetter.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const currentLetter = loveLetters[currentLetterIdx] || loveLetters[0];
+        if (currentLetter) startEditLetter(currentLetter.id);
+    });
+}
+if (btnPrevLetter) {
+    btnPrevLetter.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (currentLetterIdx > 0) displayLetter(currentLetterIdx - 1, true);
+    });
+}
+if (btnNextLetter) {
+    btnNextLetter.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (currentLetterIdx < loveLetters.length - 1) displayLetter(currentLetterIdx + 1, true);
+    });
+}
+
+// History controls listeners
+if (letterSearchInput) {
+    letterSearchInput.addEventListener("input", (e) => {
+        renderLetterHistory(e.target.value, historyFilterType);
+    });
+}
+if (btnNewLetterFromHistory) {
+    btnNewLetterFromHistory.addEventListener("click", (e) => {
+        e.stopPropagation();
+        resetComposeForm();
+        switchLetterTab("compose");
+    });
+}
+if (filterAllLetters) {
+    filterAllLetters.addEventListener("click", () => {
+        document.querySelectorAll(".history-filter-chip").forEach(c => c.classList.remove("active"));
+        filterAllLetters.classList.add("active");
+        renderLetterHistory(historySearchQuery, "all");
+    });
+}
+if (filterSenderLetters) {
+    filterSenderLetters.addEventListener("click", () => {
+        document.querySelectorAll(".history-filter-chip").forEach(c => c.classList.remove("active"));
+        filterSenderLetters.classList.add("active");
+        renderLetterHistory(historySearchQuery, "sender");
+    });
+}
+if (filterRecipientLetters) {
+    filterRecipientLetters.addEventListener("click", () => {
+        document.querySelectorAll(".history-filter-chip").forEach(c => c.classList.remove("active"));
+        filterRecipientLetters.classList.add("active");
+        renderLetterHistory(historySearchQuery, "recipient");
+    });
+}
+
+// Compose controls listeners
+if (moodSelectorRow) {
+    moodSelectorRow.querySelectorAll(".mood-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+            currentComposeMood = chip.getAttribute("data-mood") || "💖";
+            updateMoodSelectorUI();
+        });
+    });
+}
+if (inputLetterBody) {
+    inputLetterBody.addEventListener("input", updateCharCounter);
+}
+if (letterTemplateSelect) {
+    letterTemplateSelect.addEventListener("change", () => {
+        const key = letterTemplateSelect.value;
+        if (!key || !ROMANTIC_TEMPLATES[key]) return;
+        const tmpl = ROMANTIC_TEMPLATES[key];
+
+        const sName = senderName || "Mai IT";
+        const rName = recipientName || "Kim Thanh";
+        let filledContent = tmpl.content;
+        filledContent = filledContent.replace(/em\/anh/g, rName).replace(/anh\/em/g, sName);
+
+        if (inputLetterTitle && !inputLetterTitle.value.trim()) {
+            inputLetterTitle.value = tmpl.title;
+        }
+        if (inputLetterBody) {
+            inputLetterBody.value = filledContent;
+            updateCharCounter();
+        }
+        currentComposeMood = tmpl.mood || "💖";
+        updateMoodSelectorUI();
+    });
+}
+if (btnSaveLetter) {
+    btnSaveLetter.addEventListener("click", (e) => {
+        e.stopPropagation();
+        saveLetterForm();
+    });
+}
+if (btnCancelEditLetter) {
+    btnCancelEditLetter.addEventListener("click", (e) => {
+        e.stopPropagation();
+        resetComposeForm();
+        switchLetterTab("history");
+    });
+}
+
+// Guide & Sync listeners
+if (btnCopySyncCode) {
+    btnCopySyncCode.addEventListener("click", (e) => {
+        e.stopPropagation();
+        copySyncCodeToClipboard();
+    });
+}
+if (btnImportSyncCode) {
+    btnImportSyncCode.addEventListener("click", (e) => {
+        e.stopPropagation();
+        importSyncCodeFromInput();
+    });
+}
+if (btnExportJson) {
+    btnExportJson.addEventListener("click", (e) => {
+        e.stopPropagation();
+        exportJsonBackup();
+    });
+}
+if (btnTriggerImportJson && fileImportJson) {
+    btnTriggerImportJson.addEventListener("click", (e) => {
+        e.stopPropagation();
+        fileImportJson.click();
+    });
+    fileImportJson.addEventListener("change", (e) => {
+        if (e.target.files && e.target.files[0]) {
+            importJsonFile(e.target.files[0]);
+        }
+    });
+}
+if (btnResetDefaultLetters) {
+    btnResetDefaultLetters.addEventListener("click", (e) => {
+        e.stopPropagation();
+        resetDefaultLettersList();
+    });
+}
+
+// Initial load of letters
+loadLoveLetters();
 
 // ==========================================
 // 3.1 THÔNG TIN TÁC GIẢ (Author Profile Modal)
@@ -810,8 +1887,8 @@ const CAT_LOVE_QUOTES = [
 let catBubbleTimeout = null;
 
 function playMeowSound() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === "suspended") audioCtx.resume();
+    ensureAudioContext();
+    if (!audioCtx || audioCtx.state !== "running") return;
     try {
         const now = audioCtx.currentTime;
         const osc = audioCtx.createOscillator();
@@ -1309,9 +2386,23 @@ let noteStep = 0;
 
 let audioCtx = null;
 let synthInterval = null;
+let hasUserInteracted = false;
+
+function ensureAudioContext() {
+    try {
+        if (!audioCtx) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (audioCtx && audioCtx.state === "suspended") {
+            audioCtx.resume().catch(() => { });
+        }
+    } catch (e) { }
+    return audioCtx;
+}
 
 function playChimeNote(freq, delay = 0, duration = 1.2, type = "sine") {
-    if (!audioCtx) return;
+    if (!audioCtx || audioCtx.state !== "running") return;
     try {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -1329,8 +2420,7 @@ function playChimeNote(freq, delay = 0, duration = 1.2, type = "sine") {
 
 function startSynthMusic() {
     if (synthInterval) return;
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === "suspended") audioCtx.resume();
+    ensureAudioContext();
     usingSynthMusic = true;
     isMusicPlaying = true;
     if (musicToggle) musicToggle.classList.add("playing");
@@ -1362,10 +2452,12 @@ function stopSynthMusic() {
 
 function startAudio() {
     if (isMusicPlaying) return;
+    ensureAudioContext();
     playRandomSong(true);
 }
 
 function toggleMusic() {
+    ensureAudioContext();
     if (isMusicPlaying) {
         if (bgMusic && !bgMusic.paused) bgMusic.pause();
         stopSynthMusic();
@@ -1377,11 +2469,9 @@ function toggleMusic() {
 }
 
 function handleFirstInteraction() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx && audioCtx.state === "suspended") {
-        audioCtx.resume();
-    }
+    hasUserInteracted = true;
     userInteractionCount++;
+    ensureAudioContext();
     if (startHintBanner) {
         startHintBanner.classList.add("hidden");
     }
@@ -1468,12 +2558,14 @@ function triggerHaptic(pattern = 25) {
 }
 
 window.addEventListener("mousemove", (e) => {
+    if (typeof isDraggingTourCard !== "undefined" && isDraggingTourCard) return;
     targetTiltX = (e.clientX - width / 2) / (width / 2);
     targetTiltY = (e.clientY - height / 2) / (height / 2);
     addMouseTrailParticle(e.clientX, e.clientY);
 });
 
 window.addEventListener("touchmove", (e) => {
+    if (typeof isDraggingTourCard !== "undefined" && isDraggingTourCard) return;
     if (e.touches && e.touches.length > 0) {
         targetTiltX = (e.touches[0].clientX - width / 2) / (width / 2);
         targetTiltY = (e.touches[0].clientY - height / 2) / (height / 2);
@@ -1524,22 +2616,39 @@ window.addEventListener("touchmove", (e) => {
 }, { passive: true });
 window.addEventListener("touchend", () => { initialPinchDistance = null; });
 
+// Bảng Lookup Table (LUT) tính sẵn tọa độ & góc tiếp tuyến để tăng tốc CPU x10 lần
+const LUT_SIZE = 360;
+const HEART_LUT_X = new Float32Array(LUT_SIZE);
+const HEART_LUT_Y = new Float32Array(LUT_SIZE);
+const HEART_LUT_ANGLE = new Float32Array(LUT_SIZE);
+
+for (let i = 0; i < LUT_SIZE; i++) {
+    const t = (i / LUT_SIZE) * Math.PI * 2;
+    HEART_LUT_X[i] = 16 * Math.pow(Math.sin(t), 3);
+    HEART_LUT_Y[i] = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+    const dx = 48 * Math.pow(Math.sin(t), 2) * Math.cos(t);
+    const dy = 13 * Math.sin(t) - 10 * Math.sin(2 * t) - 6 * Math.sin(3 * t) - 4 * Math.sin(4 * t);
+    HEART_LUT_ANGLE[i] = Math.atan2(dy, dx);
+}
+
 function getHeartPoint(t) {
-    const x = 16 * Math.pow(Math.sin(t), 3);
-    const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-    return { x, y };
+    let normalized = (t % (Math.PI * 2));
+    if (normalized < 0) normalized += Math.PI * 2;
+    const idx = Math.floor((normalized / (Math.PI * 2)) * LUT_SIZE) % LUT_SIZE;
+    return { x: HEART_LUT_X[idx], y: HEART_LUT_Y[idx] };
 }
 
 function getTangentAngle(t) {
-    const dx = 48 * Math.pow(Math.sin(t), 2) * Math.cos(t);
-    const dy = 13 * Math.sin(t) - 10 * Math.sin(2 * t) - 6 * Math.sin(3 * t) - 4 * Math.sin(4 * t);
-    return Math.atan2(dy, dx);
+    let normalized = (t % (Math.PI * 2));
+    if (normalized < 0) normalized += Math.PI * 2;
+    const idx = Math.floor((normalized / (Math.PI * 2)) * LUT_SIZE) % LUT_SIZE;
+    return HEART_LUT_ANGLE[idx];
 }
 
 // Bảng tọa độ mẫu tối ưu sẵn cho mini heart
 const MINI_HEART_PATH = [];
-for (let t = 0; t <= Math.PI * 2; t += 0.15) {
-    MINI_HEART_PATH.push(getHeartPoint(t));
+for (let i = 0; i < LUT_SIZE; i += 8) {
+    MINI_HEART_PATH.push({ x: HEART_LUT_X[i], y: HEART_LUT_Y[i] });
 }
 
 function drawMiniHeart(ctx, x, y, size, angle, color) {
@@ -1548,8 +2657,8 @@ function drawMiniHeart(ctx, x, y, size, angle, color) {
     if (angle) ctx.rotate(angle);
     ctx.beginPath();
     const s = size / 16;
-    ctx.moveTo(0, 0);
-    for (let i = 0; i < MINI_HEART_PATH.length; i++) {
+    ctx.moveTo(MINI_HEART_PATH[0].x * s, MINI_HEART_PATH[0].y * s);
+    for (let i = 1; i < MINI_HEART_PATH.length; i++) {
         const p = MINI_HEART_PATH[i];
         ctx.lineTo(p.x * s, p.y * s);
     }
@@ -1602,7 +2711,7 @@ setInterval(() => {
 
 // 6.2 CÁNH HOA ANH ĐÀO RƠI (Sakura Blossom Petals - Dành cho Nền Nghệ Thuật)
 const sakuraPetals = [];
-for (let i = 0; i < 28; i++) {
+for (let i = 0; i < 16; i++) {
     sakuraPetals.push({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -1621,7 +2730,8 @@ for (let i = 0; i < 28; i++) {
 function drawFallingSakura(ctx, now, alpha) {
     if (alpha < 0.01) return;
     ctx.save();
-    for (let p of sakuraPetals) {
+    for (let i = 0; i < sakuraPetals.length; i++) {
+        const p = sakuraPetals[i];
         p.y += p.vy;
         p.x += Math.sin(now * 0.002 + p.swayPhase) * 1.2 + p.vx * 0.35;
         p.rot += p.vRot;
@@ -1652,7 +2762,7 @@ function drawFallingSakura(ctx, now, alpha) {
 
 // 6.3 KIM TUYẾN LẤP LÁNH (Sparkling Glitter & Diamond Confetti - Dành cho Nền Chuẩn & Thuần Khiết)
 const glitterParticles = [];
-for (let i = 0; i < 30; i++) {
+for (let i = 0; i < 18; i++) {
     glitterParticles.push({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -1671,7 +2781,8 @@ for (let i = 0; i < 30; i++) {
 function drawFallingGlitter(ctx, now, alpha) {
     if (alpha < 0.01) return;
     ctx.save();
-    for (let g of glitterParticles) {
+    for (let i = 0; i < glitterParticles.length; i++) {
+        const g = glitterParticles[i];
         g.y += g.vy;
         g.x += g.vx + Math.sin(now * 0.0015 + g.twinklePhase) * 0.6;
         g.rot += g.vRot;
@@ -1840,19 +2951,8 @@ function updateAndDrawFireworks(ctx) {
 }
 
 // ==========================================
-// 6.5. ĐỒNG HỒ ĐẾM NGÀY YÊU & TÙY CHỈNH TÊN KỶ NIỆM
+// 6.5. ĐỒNG HỒ ĐẾM NGÀY YÊU & HỆ THỐNG LƯU TRỮ DÒNG THỜI GIAN KỶ NIỆM (4 TABS)
 // ==========================================
-let senderName = localStorage.getItem("love_sender_name") || "Mai IT";
-let recipientName = localStorage.getItem("love_recipient_name") || "Kim Thanh";
-
-let storedDate = localStorage.getItem("love_start_date");
-if (!storedDate || storedDate === "2024-01-01" || storedDate === "2026-08-30") {
-    storedDate = "2026-08-30T13:30";
-    localStorage.setItem("love_start_date", storedDate);
-}
-let loveStartDate = storedDate;
-let customLoveLetter = localStorage.getItem("love_custom_letter") || "";
-
 const loveDaysWidget = document.getElementById("loveDaysWidget");
 const widgetNames = document.getElementById("widgetNames");
 const widgetDaysText = document.getElementById("widgetDaysText");
@@ -1867,6 +2967,135 @@ const inputSenderName = document.getElementById("inputSenderName");
 const inputRecipientName = document.getElementById("inputRecipientName");
 const inputLoveDate = document.getElementById("inputLoveDate");
 const inputCustomMessage = document.getElementById("inputCustomMessage");
+
+// Milestone Elements
+const milestoneHistoryBadge = document.getElementById("milestoneHistoryBadge");
+const milestoneSearchInput = document.getElementById("milestoneSearchInput");
+const btnNewMilestoneFromTimeline = document.getElementById("btnNewMilestoneFromTimeline");
+const milestoneTimelineList = document.getElementById("milestoneTimelineList");
+
+const milestoneComposeTitle = document.getElementById("milestoneComposeTitle");
+const inputMilestoneEditId = document.getElementById("inputMilestoneEditId");
+const milestoneIconSelectorRow = document.getElementById("milestoneIconSelectorRow");
+const milestoneTemplateSelect = document.getElementById("milestoneTemplateSelect");
+const inputMilestoneTitle = document.getElementById("inputMilestoneTitle");
+const inputMilestoneDate = document.getElementById("inputMilestoneDate");
+const inputMilestoneDesc = document.getElementById("inputMilestoneDesc");
+const btnSaveMilestone = document.getElementById("btnSaveMilestone");
+const saveMilestoneBtnIcon = document.getElementById("saveMilestoneBtnIcon");
+const saveMilestoneBtnText = document.getElementById("saveMilestoneBtnText");
+const btnCancelEditMilestone = document.getElementById("btnCancelEditMilestone");
+
+const btnCopyMilestoneSyncCode = document.getElementById("btnCopyMilestoneSyncCode");
+const inputMilestoneSyncCode = document.getElementById("inputMilestoneSyncCode");
+const btnImportMilestoneSyncCode = document.getElementById("btnImportMilestoneSyncCode");
+const btnExportMilestoneJson = document.getElementById("btnExportMilestoneJson");
+const btnTriggerImportMilestoneJson = document.getElementById("btnTriggerImportMilestoneJson");
+const fileImportMilestoneJson = document.getElementById("fileImportMilestoneJson");
+const btnResetDefaultMilestones = document.getElementById("btnResetDefaultMilestones");
+
+let selectedMilestoneIcon = "💖";
+let milestoneSearchQuery = "";
+
+// Template Kỷ Niệm Gợi Ý
+const MILESTONE_TEMPLATES = {
+    first_meet: {
+        icon: "☕",
+        title: "Lần Đầu Tiên Gặp Gỡ & Trò Chuyện ☕",
+        desc: "Buổi cà phê đầu tiên ngập tràn nụ cười, những ánh mắt ngại ngùng nhưng đong đầy cảm xúc ấm áp!"
+    },
+    first_confess: {
+        icon: "💖",
+        title: "Ngày Chính Thức Nói Lời Yêu Nhau 💕",
+        desc: "Khoảnh khắc tuyệt vời nhất khi hai trái tim chính thức hòa chung một nhịp đập, hứa hẹn một tình yêu bền lâu!"
+    },
+    first_hold: {
+        icon: "🌸",
+        title: "Lần Đầu Tiên Nắm Tay & Dạo Phố 🌸",
+        desc: "Bàn tay ấm áp nắm chặt lấy nhau giữa phố đông người, cảm giác bình yên và hạnh phúc ngập tràn."
+    },
+    first_movie: {
+        icon: "🎬",
+        title: "Buổi Hẹn Hò Xem Phim Đáng Nhớ 🎬",
+        desc: "Cùng nhau chia sẻ từng khoảnh khắc cảm động trong rạp chiếu phim, tựa vai nhau ấm áp."
+    },
+    first_trip: {
+        icon: "✈️",
+        title: "Chuyến Du Lịch Đầu Tiên Cùng Nhau 🏖️",
+        desc: "Hành trình khám phá những vùng đất mới, lưu giữ vô vàn bức ảnh kỷ niệm ngọt ngào và đáng yêu!"
+    },
+    first_bday: {
+        icon: "🎁",
+        title: "Sinh Nhật Đầu Tiên Được Ở Bên Người Ấy 🎂",
+        desc: "Những ngọn nến lung linh và lời nguyện ước yêu thương, cảm ơn vì đã sinh ra và bước đến bên nhau!"
+    },
+    future_promise: {
+        icon: "💍",
+        title: "Lời Ước Hẹn Về Tương Lai Hai Đứa 💍",
+        desc: "Cùng nhau vun đắp một mái ấm tràn ngập tiếng cười, đi qua mọi thăng trầm của cuộc đời!"
+    }
+};
+
+function getDefaultMilestones() {
+    return [
+        {
+            id: "ms_main",
+            title: "Ngày Chính Thức Yêu Nhau 💕",
+            icon: "💖",
+            date: "2026-08-30T13:30",
+            desc: `Khoảnh khắc ngọt ngào nhất khi ${senderName} & ${recipientName} chính thức nắm tay nhau và bắt đầu hành trình tình yêu đẹp đẽ!`,
+            isMain: true
+        },
+        {
+            id: "ms_meet",
+            title: "Lần Đầu Tiên Gặp Gỡ & Trò Chuyện ☕",
+            icon: "☕",
+            date: "2026-08-15T09:00",
+            desc: "Buổi cà phê đầu tiên ngập tràn nụ cười, những ánh mắt ngại ngùng nhưng đong đầy cảm xúc ấm áp!",
+            isMain: false
+        },
+        {
+            id: "ms_walk",
+            title: "Buổi Hẹn Hò & Dạo Phố Dưới Ánh Hoàng Hôn 🌸",
+            icon: "🌸",
+            date: "2026-08-22T17:30",
+            desc: "Cùng nhau đi dạo dưới làn gió mát, chia sẻ những ước mơ và niềm vui trong cuộc sống.",
+            isMain: false
+        },
+        {
+            id: "ms_promise",
+            title: "Lời Ước Hẹn Bên Nhau Mãi Mãi 💍",
+            icon: "💍",
+            date: "2026-09-01T20:00",
+            desc: "Hứa sẽ luôn yêu thương, che chở, thấu hiểu và cùng nhau vượt qua mọi thử thách trên đường đời.",
+            isMain: false
+        }
+    ];
+}
+
+let loveMilestones = [];
+try {
+    const rawMilestones = localStorage.getItem("love_milestones_history");
+    if (rawMilestones) {
+        loveMilestones = JSON.parse(rawMilestones);
+    }
+} catch (e) {
+    console.error("Lỗi đọc love_milestones_history:", e);
+}
+
+if (!Array.isArray(loveMilestones) || loveMilestones.length === 0) {
+    loveMilestones = getDefaultMilestones();
+    localStorage.setItem("love_milestones_history", JSON.stringify(loveMilestones));
+}
+
+function saveMilestonesToStorage() {
+    try {
+        localStorage.setItem("love_milestones_history", JSON.stringify(loveMilestones));
+    } catch (e) {
+        console.error("Lỗi lưu love_milestones_history:", e);
+    }
+    renderMilestonesTimeline(milestoneSearchQuery);
+}
 
 function updateLoveDays() {
     const start = new Date(loveStartDate).getTime();
@@ -1888,22 +3117,358 @@ function applyCustomSettings() {
     if (inputRecipientName) inputRecipientName.value = recipientName;
     if (inputLoveDate) inputLoveDate.value = loveStartDate;
     if (inputCustomMessage) inputCustomMessage.value = customLoveLetter;
+    renderMilestonesTimeline(milestoneSearchQuery);
+}
 
-    if (typeof TOUR_STEPS !== "undefined" && TOUR_STEPS[0]) {
-        TOUR_STEPS[0].desc = `Xin chào ${recipientName}! Chạm vào tim để bùng nổ vũ trụ lung linh nha! ✨`;
+function switchMilestoneTab(tabName) {
+    const validTabs = ["settings", "timeline", "compose", "guide"];
+    if (!validTabs.includes(tabName)) tabName = "settings";
+
+    document.querySelectorAll("#nameEditorModal .letter-nav-tab").forEach(btn => {
+        const isActive = btn.getAttribute("data-tab") === tabName;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+
+    const panes = {
+        settings: document.getElementById("paneMilestoneSettings"),
+        timeline: document.getElementById("paneMilestoneTimeline"),
+        compose: document.getElementById("paneMilestoneCompose"),
+        guide: document.getElementById("paneMilestoneGuide")
+    };
+
+    Object.keys(panes).forEach(k => {
+        if (panes[k]) panes[k].classList.toggle("active", k === tabName);
+    });
+
+    if (tabName === "timeline") {
+        renderMilestonesTimeline(milestoneSearchQuery);
+    } else if (tabName === "compose" && (!inputMilestoneEditId || !inputMilestoneEditId.value)) {
+        resetMilestoneComposeForm();
     }
+}
+
+function formatMilestoneDateTime(dtStr) {
+    if (!dtStr) return "";
+    try {
+        const d = new Date(dtStr);
+        if (isNaN(d.getTime())) return dtStr;
+        const pad = (n) => String(n).padStart(2, "0");
+        return `${pad(d.getHours())}:${pad(d.getMinutes())} ngày ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    } catch (e) {
+        return dtStr;
+    }
+}
+
+function renderMilestonesTimeline(query = "") {
+    if (!milestoneTimelineList) return;
+    milestoneTimelineList.innerHTML = "";
+
+    const q = (query || "").trim().toLowerCase();
+    const filtered = loveMilestones.filter(m => {
+        if (!q) return true;
+        const matchTitle = (m.title || "").toLowerCase().includes(q);
+        const matchDesc = (m.desc || "").toLowerCase().includes(q);
+        const matchDate = (m.date || "").toLowerCase().includes(q);
+        return matchTitle || matchDesc || matchDate;
+    });
+
+    if (milestoneHistoryBadge) {
+        milestoneHistoryBadge.textContent = loveMilestones.length;
+    }
+
+    if (filtered.length === 0) {
+        milestoneTimelineList.innerHTML = `
+            <div class="empty-history-state">
+                <span class="empty-icon">🌸</span>
+                <p>Chưa có cột mốc kỷ niệm nào phù hợp.</p>
+                <button type="button" class="history-new-btn" onclick="switchMilestoneTab('compose')">
+                    <span>✨</span> Thêm Kỷ Niệm Đầu Tiên
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    const now = Date.now();
+
+    filtered.forEach(m => {
+        const card = document.createElement("div");
+        card.className = `milestone-card-item ${m.isMain ? 'is-main' : ''}`;
+        card.setAttribute("data-id", m.id);
+
+        const mTime = new Date(m.date).getTime();
+        let daysBadgeHtml = "";
+
+        if (!isNaN(mTime)) {
+            if (mTime <= now) {
+                const diffDays = Math.floor((now - mTime) / (1000 * 60 * 60 * 24));
+                daysBadgeHtml = `<span class="milestone-days-badge past">Đã qua ${diffDays} ngày</span>`;
+            } else {
+                const diffDays = Math.ceil((mTime - now) / (1000 * 60 * 60 * 24));
+                daysBadgeHtml = `<span class="milestone-days-badge future">Còn ${diffDays} ngày nữa</span>`;
+            }
+        }
+
+        card.innerHTML = `
+            <div class="milestone-card-header">
+                <div class="milestone-card-title-row">
+                    <span class="milestone-card-icon">${m.icon || '💖'}</span>
+                    <h3 class="milestone-card-title">${escapeHtml(m.title || 'Kỷ Niệm Yêu')}</h3>
+                </div>
+                ${daysBadgeHtml}
+            </div>
+            <p class="milestone-card-desc">${escapeHtml(m.desc || '')}</p>
+            <div class="milestone-card-footer">
+                <span class="milestone-card-date">⏳ ${formatMilestoneDateTime(m.date)}</span>
+                <div class="milestone-card-actions">
+                    <button type="button" class="history-card-btn" title="Chỉnh sửa cột mốc này" onclick="startEditMilestone('${m.id}')">
+                        ✏️ Sửa
+                    </button>
+                    <button type="button" class="history-card-btn" title="Sao chép nội dung kỷ niệm" onclick="copyMilestoneContent('${m.id}')">
+                        📋 Chép
+                    </button>
+                    <button type="button" class="history-card-btn delete" title="Xóa cột mốc này" onclick="deleteMilestone('${m.id}')">
+                        🗑️ Xóa
+                    </button>
+                </div>
+            </div>
+        `;
+
+        milestoneTimelineList.appendChild(card);
+    });
+}
+
+function resetMilestoneComposeForm() {
+    if (inputMilestoneEditId) inputMilestoneEditId.value = "";
+    if (inputMilestoneTitle) inputMilestoneTitle.value = "";
+    if (inputMilestoneDate) {
+        const now = new Date();
+        const pad = (n) => String(n).padStart(2, "0");
+        inputMilestoneDate.value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    }
+    if (inputMilestoneDesc) inputMilestoneDesc.value = "";
+    if (milestoneTemplateSelect) milestoneTemplateSelect.value = "";
+
+    selectedMilestoneIcon = "💖";
+    if (milestoneIconSelectorRow) {
+        milestoneIconSelectorRow.querySelectorAll(".mood-chip").forEach(btn => {
+            btn.classList.toggle("active", btn.getAttribute("data-icon") === "💖");
+        });
+    }
+
+    if (milestoneComposeTitle) milestoneComposeTitle.textContent = "✨ Thêm Cột Mốc Kỷ Niệm Mới";
+    if (saveMilestoneBtnIcon) saveMilestoneBtnIcon.textContent = "✨";
+    if (saveMilestoneBtnText) saveMilestoneBtnText.textContent = "Lưu Vào Dòng Kỷ Niệm";
+}
+
+function startEditMilestone(id) {
+    const item = loveMilestones.find(m => m.id === id);
+    if (!item) return;
+
+    if (inputMilestoneEditId) inputMilestoneEditId.value = item.id;
+    if (inputMilestoneTitle) inputMilestoneTitle.value = item.title || "";
+    if (inputMilestoneDate) inputMilestoneDate.value = item.date || "";
+    if (inputMilestoneDesc) inputMilestoneDesc.value = item.desc || "";
+
+    selectedMilestoneIcon = item.icon || "💖";
+    if (milestoneIconSelectorRow) {
+        milestoneIconSelectorRow.querySelectorAll(".mood-chip").forEach(btn => {
+            btn.classList.toggle("active", btn.getAttribute("data-icon") === selectedMilestoneIcon);
+        });
+    }
+
+    if (milestoneComposeTitle) milestoneComposeTitle.textContent = "✏️ Chỉnh Sửa Cột Mốc Kỷ Niệm";
+    if (saveMilestoneBtnIcon) saveMilestoneBtnIcon.textContent = "💾";
+    if (saveMilestoneBtnText) saveMilestoneBtnText.textContent = "Cập Nhật Kỷ Niệm";
+
+    switchMilestoneTab("compose");
+}
+
+function deleteMilestone(id) {
+    const idx = loveMilestones.findIndex(m => m.id === id);
+    if (idx === -1) return;
+
+    const item = loveMilestones[idx];
+    if (item.isMain) {
+        showToastCard("⚠️ Lưu Ý", "Đây là cột mốc chính dùng để đếm ngày yêu. Bạn có thể sửa ngày tại Cài Đặt Chính!", 4500, "Đây là cột mốc chính dùng để đếm ngày yêu.");
+        return;
+    }
+
+    loveMilestones.splice(idx, 1);
+    saveMilestonesToStorage();
+    showToastCard("🗑️ Đã Xóa Kỷ Niệm!", "Cột mốc đã được xóa khỏi dòng thời gian.", 3000, "Đã xóa kỷ niệm.");
+}
+
+function copyMilestoneContent(id) {
+    const item = loveMilestones.find(m => m.id === id);
+    if (!item) return;
+
+    const textToCopy = `✨ [${item.icon || '💖'} ${item.title}]\n⏳ Thời gian: ${formatMilestoneDateTime(item.date)}\n📝 ${item.desc}\n💕 Tình yêu của ${senderName} & ${recipientName}`;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        showToastCard("📋 Đã Sao Chép!", "Nội dung kỷ niệm đã được sao chép vào bộ nhớ đệm.", 3000, "Đã sao chép nội dung kỷ niệm.");
+    }).catch(() => {
+        showToastCard("📋 Thông Báo", "Vui lòng sao chép thủ công nội dung.", 3000);
+    });
+}
+
+function handleSaveMilestone() {
+    const title = (inputMilestoneTitle && inputMilestoneTitle.value.trim()) || "Khoảnh Khắc Kỷ Niệm";
+    const date = (inputMilestoneDate && inputMilestoneDate.value) || new Date().toISOString().slice(0, 16);
+    const desc = (inputMilestoneDesc && inputMilestoneDesc.value.trim()) || "";
+    const editId = (inputMilestoneEditId && inputMilestoneEditId.value.trim()) || "";
+
+    if (editId) {
+        const item = loveMilestones.find(m => m.id === editId);
+        if (item) {
+            item.title = title;
+            item.icon = selectedMilestoneIcon;
+            item.date = date;
+            item.desc = desc;
+        }
+        showToastCard("💾 Cập Nhật Thành Công!", `Cột mốc "${title}" đã được cập nhật lung linh! ✨`, 4500, "Cập nhật kỷ niệm thành công!");
+    } else {
+        const newMilestone = {
+            id: "ms_" + Date.now(),
+            title: title,
+            icon: selectedMilestoneIcon,
+            date: date,
+            desc: desc,
+            isMain: false
+        };
+        loveMilestones.unshift(newMilestone);
+        showToastCard("✨ Thêm Kỷ Niệm Mới!", `Cột mốc "${title}" đã được lưu vào dòng thời gian! 💖`, 4500, "Thêm kỷ niệm mới thành công!");
+    }
+
+    saveMilestonesToStorage();
+    resetMilestoneComposeForm();
+    switchMilestoneTab("timeline");
+    launchHeartFireworks();
+}
+
+// Milestone Sync Code Encode / Decode
+function encodeMilestoneSyncCode() {
+    try {
+        const payload = {
+            senderName,
+            recipientName,
+            loveStartDate,
+            customLoveLetter,
+            milestones: loveMilestones,
+            timestamp: Date.now()
+        };
+        const jsonStr = JSON.stringify(payload);
+        return btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+            return String.fromCharCode(parseInt(p1, 16));
+        }));
+    } catch (e) {
+        console.error("Lỗi mã hóa milestone sync code:", e);
+        return null;
+    }
+}
+
+function decodeMilestoneSyncCode(base64Str) {
+    try {
+        const binaryStr = atob(base64Str.trim());
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+        }
+        const decodedUri = new TextDecoder().decode(bytes);
+        return JSON.parse(decodedUri);
+    } catch (e) {
+        try {
+            return JSON.parse(decodeURIComponent(escape(atob(base64Str.trim()))));
+        } catch (e2) {
+            console.error("Lỗi giải mã milestone sync code:", e2);
+            return null;
+        }
+    }
+}
+
+function exportMilestonesJson() {
+    const payload = {
+        senderName,
+        recipientName,
+        loveStartDate,
+        customLoveLetter,
+        milestones: loveMilestones,
+        exportedAt: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `dong_thoi_gian_ky_niem_${senderName}_${recipientName}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToastCard("📁 Đã Tải File!", "File sao lưu kỷ niệm đã được tải về máy của bạn.", 3500, "Đã tải file sao lưu kỷ niệm.");
+}
+
+function importMilestonesJson(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data.senderName) senderName = data.senderName;
+            if (data.recipientName) recipientName = data.recipientName;
+            if (data.loveStartDate) loveStartDate = data.loveStartDate;
+            if (data.customLoveLetter !== undefined) customLoveLetter = data.customLoveLetter;
+
+            if (Array.isArray(data.milestones) && data.milestones.length > 0) {
+                loveMilestones = data.milestones;
+            }
+
+            localStorage.setItem("love_sender_name", senderName);
+            localStorage.setItem("love_recipient_name", recipientName);
+            localStorage.setItem("love_start_date", loveStartDate);
+            localStorage.setItem("love_custom_letter", customLoveLetter);
+
+            saveMilestonesToStorage();
+            applyCustomSettings();
+            syncLoveLetterNames();
+
+            showToastCard("📂 Nhập Kỷ Niệm Thành Công!", `Đã nạp đầy đủ dòng thời gian của ${senderName} & ${recipientName}! ✨`, 5000, "Nhập kỷ niệm thành công!");
+            switchMilestoneTab("timeline");
+        } catch (err) {
+            showToastCard("❌ Lỗi Nhập File", "File không hợp lệ hoặc bị lỗi định dạng JSON.", 4000, "Lỗi nhập file.");
+        }
+    };
+    reader.readAsText(file);
+}
+
+function openNameEditorModal(tab = "settings") {
+    if (!nameEditorModal) return;
+    applyCustomSettings();
+    switchMilestoneTab(tab);
+    nameEditorModal.classList.add("open");
+}
+
+function closeNameEditorModal() {
+    if (!nameEditorModal) return;
+    nameEditorModal.classList.remove("open");
 }
 
 setInterval(updateLoveDays, 1000);
 updateLoveDays();
 
+// Event listeners for Name Editor & Milestones
 if (loveDaysWidget) {
     loveDaysWidget.addEventListener("click", (e) => {
         e.stopPropagation();
-        if (nameEditorModal) {
-            applyCustomSettings();
-            nameEditorModal.classList.add("open");
-        }
+        openNameEditorModal("settings");
+    });
+}
+
+const topMilestoneBtn = document.getElementById("topMilestoneBtn");
+if (topMilestoneBtn) {
+    topMilestoneBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeHeartMenu();
+        openNameEditorModal("settings");
     });
 }
 
@@ -1911,32 +3476,44 @@ if (nameEditorBtn) {
     nameEditorBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         closeControlHub();
-        if (nameEditorModal) {
-            applyCustomSettings();
-            nameEditorModal.classList.add("open");
-        }
+        openNameEditorModal("settings");
     });
 }
 
 if (closeNameEditorBtn) {
     closeNameEditorBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        if (nameEditorModal) nameEditorModal.classList.remove("open");
+        closeNameEditorModal();
     });
 }
 
 if (nameEditorBackdrop) {
     nameEditorBackdrop.addEventListener("click", (e) => {
         e.stopPropagation();
-        if (nameEditorModal) nameEditorModal.classList.remove("open");
+        closeNameEditorModal();
     });
 }
+
+if (nameEditorModal) {
+    nameEditorModal.addEventListener("click", (e) => {
+        if (e.target === nameEditorModal) closeNameEditorModal();
+    });
+}
+
+// Milestone Tab Navigation
+document.querySelectorAll("#nameEditorModal .letter-nav-tab").forEach(tab => {
+    tab.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const targetTab = tab.getAttribute("data-tab");
+        switchMilestoneTab(targetTab);
+    });
+});
 
 if (saveNameSettingsBtn) {
     saveNameSettingsBtn.addEventListener("click", () => {
         senderName = (inputSenderName && inputSenderName.value.trim()) || "Mai IT";
         recipientName = (inputRecipientName && inputRecipientName.value.trim()) || "Kim Thanh";
-        loveStartDate = (inputLoveDate && inputLoveDate.value) || "2024-01-01";
+        loveStartDate = (inputLoveDate && inputLoveDate.value) || "2026-08-30T13:30";
         customLoveLetter = (inputCustomMessage && inputCustomMessage.value.trim()) || "";
 
         localStorage.setItem("love_sender_name", senderName);
@@ -1944,13 +3521,181 @@ if (saveNameSettingsBtn) {
         localStorage.setItem("love_start_date", loveStartDate);
         localStorage.setItem("love_custom_letter", customLoveLetter);
 
+        // Cập nhật mốc chính trong loveMilestones nếu có
+        const mainMilestone = loveMilestones.find(m => m.isMain || m.id === "ms_main");
+        if (mainMilestone) {
+            mainMilestone.date = loveStartDate;
+            mainMilestone.desc = `Khoảnh khắc ngọt ngào nhất khi ${senderName} & ${recipientName} chính thức nắm tay nhau và bắt đầu hành trình tình yêu đẹp đẽ!`;
+            saveMilestonesToStorage();
+        }
+
         applyCustomSettings();
-        if (nameEditorModal) nameEditorModal.classList.remove("open");
+        syncLoveLetterNames();
+        closeNameEditorModal();
 
         showToastCard("💖 Đã Lưu Kỷ Niệm!", `Tình yêu của ${senderName} & ${recipientName} đã được cập nhật lung linh! ✨`, 5000, `Tình yêu của ${senderName} & ${recipientName} đã được cập nhật lung linh!`, "save_settings.mp3");
         launchHeartFireworks();
     });
 }
+
+// Milestone Search & Filter
+if (milestoneSearchInput) {
+    milestoneSearchInput.addEventListener("input", (e) => {
+        milestoneSearchQuery = e.target.value;
+        renderMilestonesTimeline(milestoneSearchQuery);
+    });
+}
+
+if (btnNewMilestoneFromTimeline) {
+    btnNewMilestoneFromTimeline.addEventListener("click", (e) => {
+        e.stopPropagation();
+        resetMilestoneComposeForm();
+        switchMilestoneTab("compose");
+    });
+}
+
+// Icon Selector
+if (milestoneIconSelectorRow) {
+    milestoneIconSelectorRow.querySelectorAll(".mood-chip").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            milestoneIconSelectorRow.querySelectorAll(".mood-chip").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            selectedMilestoneIcon = btn.getAttribute("data-icon") || "💖";
+        });
+    });
+}
+
+// Template Selector
+if (milestoneTemplateSelect) {
+    milestoneTemplateSelect.addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (!val || !MILESTONE_TEMPLATES[val]) return;
+
+        const tmpl = MILESTONE_TEMPLATES[val];
+        selectedMilestoneIcon = tmpl.icon;
+        if (inputMilestoneTitle) inputMilestoneTitle.value = tmpl.title;
+        if (inputMilestoneDesc) inputMilestoneDesc.value = tmpl.desc;
+
+        if (milestoneIconSelectorRow) {
+            milestoneIconSelectorRow.querySelectorAll(".mood-chip").forEach(btn => {
+                btn.classList.toggle("active", btn.getAttribute("data-icon") === tmpl.icon);
+            });
+        }
+    });
+}
+
+if (btnSaveMilestone) {
+    btnSaveMilestone.addEventListener("click", (e) => {
+        e.stopPropagation();
+        handleSaveMilestone();
+    });
+}
+
+if (btnCancelEditMilestone) {
+    btnCancelEditMilestone.addEventListener("click", (e) => {
+        e.stopPropagation();
+        resetMilestoneComposeForm();
+    });
+}
+
+// Sync Code & Tools for Milestones
+if (btnCopyMilestoneSyncCode) {
+    btnCopyMilestoneSyncCode.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const code = encodeMilestoneSyncCode();
+        if (code) {
+            navigator.clipboard.writeText(code).then(() => {
+                showToastCard("📋 Đã Sao Chép Mã Kỷ Niệm!", "Hãy gửi mã này qua Zalo/Messenger để người yêu đồng bộ nhé! 💖", 5000, "Đã sao chép mã đồng bộ kỷ niệm.");
+            }).catch(() => {
+                if (inputMilestoneSyncCode) {
+                    inputMilestoneSyncCode.value = code;
+                    inputMilestoneSyncCode.select();
+                }
+                showToastCard("📋 Mã Đồng Bộ", "Đã hiển thị mã kỷ niệm trong ô nhập bên dưới.", 4000);
+            });
+        }
+    });
+}
+
+if (btnImportMilestoneSyncCode) {
+    btnImportMilestoneSyncCode.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const code = inputMilestoneSyncCode ? inputMilestoneSyncCode.value.trim() : "";
+        if (!code) {
+            showToastCard("⚠️ Chưa Nhập Mã", "Vui lòng dán mã đồng bộ kỷ niệm vào ô nhập trước!", 3500);
+            return;
+        }
+
+        const data = decodeMilestoneSyncCode(code);
+        if (!data) {
+            showToastCard("❌ Mã Không Hợp Lệ", "Mã kỷ niệm bị sai hoặc không đúng định dạng.", 4000);
+            return;
+        }
+
+        if (data.senderName) senderName = data.senderName;
+        if (data.recipientName) recipientName = data.recipientName;
+        if (data.loveStartDate) loveStartDate = data.loveStartDate;
+        if (data.customLoveLetter !== undefined) customLoveLetter = data.customLoveLetter;
+
+        if (Array.isArray(data.milestones) && data.milestones.length > 0) {
+            loveMilestones = data.milestones;
+        }
+
+        localStorage.setItem("love_sender_name", senderName);
+        localStorage.setItem("love_recipient_name", recipientName);
+        localStorage.setItem("love_start_date", loveStartDate);
+        localStorage.setItem("love_custom_letter", customLoveLetter);
+
+        saveMilestonesToStorage();
+        applyCustomSettings();
+        syncLoveLetterNames();
+
+        if (inputMilestoneSyncCode) inputMilestoneSyncCode.value = "";
+        showToastCard("🎉 Đồng Bộ Kỷ Niệm Thành Công!", `Đã cập nhật toàn bộ dòng thời gian của ${senderName} & ${recipientName}! ✨`, 5000, "Đồng bộ kỷ niệm thành công!");
+        switchMilestoneTab("timeline");
+        launchHeartFireworks();
+    });
+}
+
+if (btnExportMilestoneJson) {
+    btnExportMilestoneJson.addEventListener("click", (e) => {
+        e.stopPropagation();
+        exportMilestonesJson();
+    });
+}
+
+if (btnTriggerImportMilestoneJson) {
+    btnTriggerImportMilestoneJson.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (fileImportMilestoneJson) fileImportMilestoneJson.click();
+    });
+}
+
+if (fileImportMilestoneJson) {
+    fileImportMilestoneJson.addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) importMilestonesJson(file);
+    });
+}
+
+if (btnResetDefaultMilestones) {
+    btnResetDefaultMilestones.addEventListener("click", (e) => {
+        e.stopPropagation();
+        loveMilestones = getDefaultMilestones();
+        saveMilestonesToStorage();
+        showToastCard("🔄 Đã Khôi Phục!", "Dòng thời gian đã được khôi phục về các cột mốc mẫu mặc định.", 3500, "Đã khôi phục mẫu kỷ niệm.");
+        switchMilestoneTab("timeline");
+    });
+}
+
+// Window attachments for Milestone functions
+window.switchMilestoneTab = switchMilestoneTab;
+window.startEditMilestone = startEditMilestone;
+window.copyMilestoneContent = copyMilestoneContent;
+window.deleteMilestone = deleteMilestone;
+window.openNameEditorModal = openNameEditorModal;
+window.closeNameEditorModal = closeNameEditorModal;
 
 // Bắn pháo hoa nút trên thanh công cụ và trong hub
 const fireworksBtn = document.getElementById("fireworksBtn");
@@ -1987,11 +3732,12 @@ if (heartCanvas) {
 }
 
 // ==========================================
-// 7. RENDER 5 KIỂU DÁNG NGHỆ THUẬT
+// 7. RENDER 5 KIỂU DÁNG NGHỆ THUẬT (Tối ưu hóa hiệu năng đỉnh cao)
 // ==========================================
 
+const GALAXY_HEART_COUNT = 110;
 const galaxyParticles = [];
-for (let i = 0; i < 180; i++) {
+for (let i = 0; i < GALAXY_HEART_COUNT; i++) {
     const t = Math.random() * Math.PI * 2;
     const hp = getHeartPoint(t);
     const spread = Math.pow(Math.random(), 0.7);
@@ -2008,44 +3754,37 @@ for (let i = 0; i < 180; i++) {
 
 function drawShapeGalaxyHeart(ctx, scale, now, isBeating, beatScale, theme) {
     ctx.save();
-    // 1. Luôn hiển thị trái tim pha lê thuần khiết sắc nét, vững vàng ở tâm
+    // 1. Luôn hiển thị trái tim pha lê thuần khiết sắc nét, vừa vặn ở tâm
     drawShapePureGlassHeart(ctx, scale, now, isBeating, beatScale, theme);
 
     // 2. Dải ngân hà 3D gồm các vì sao ánh sáng xoay chuyển liên tục
     const rotY = now * 0.0009;
-    const perspective = 260;
+    const perspective = 220;
 
-    const projected = [];
-    for (let p of galaxyParticles) {
+    for (let i = 0; i < GALAXY_HEART_COUNT; i++) {
+        const p = galaxyParticles[i];
         p.phase += p.speed;
-        const wiggleX = Math.sin(p.phase) * 1.5;
-        const wiggleY = Math.cos(p.phase) * 1.5;
+        const wiggleX = Math.sin(p.phase) * 1.2;
+        const wiggleY = Math.cos(p.phase) * 1.2;
 
         const x = (p.baseX + wiggleX) * scale;
         const y = (p.baseY + wiggleY) * scale;
-        const z = (p.baseZ + Math.sin(p.phase * 2) * 4) * scale;
+        const z = (p.baseZ + Math.sin(p.phase * 2) * 3) * scale;
 
         const rx = x * Math.cos(rotY) - z * Math.sin(rotY);
         const rz = x * Math.sin(rotY) + z * Math.cos(rotY);
         const ry = y;
 
-        const proj = perspective / (perspective + rz + 100);
-        projected.push({
-            x: rx * proj,
-            y: ry * proj,
-            z: rz,
-            size: p.size * proj * beatScale * 1.15,
-            alpha: Math.min(1.0, Math.max(0.3, (rz + 60) / 120))
-        });
-    }
+        const proj = perspective / (perspective + rz + 80);
+        const px = rx * proj;
+        const py = ry * proj;
+        const size = p.size * proj * beatScale * 0.95;
+        const alpha = Math.min(1.0, Math.max(0.25, (rz + 50) / 100));
 
-    projected.sort((a, b) => a.z - b.z);
-
-    for (let p of projected) {
         ctx.fillStyle = theme.textColor;
-        ctx.globalAlpha = p.alpha * 0.95;
+        ctx.globalAlpha = alpha * 0.95;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.arc(px, py, size, 0, Math.PI * 2);
         ctx.fill();
     }
     ctx.restore();
@@ -2053,15 +3792,15 @@ function drawShapeGalaxyHeart(ctx, scale, now, isBeating, beatScale, theme) {
 
 function drawShapeBloomingRose(ctx, scale, now, isBeating, beatScale, theme) {
     ctx.save();
-    const bloom = Math.sin(now * 0.002) * 0.08 + (isBeating ? 0.25 : 0);
-    const roseScale = scale * 1.35 * (1 + bloom);
+    const bloom = Math.sin(now * 0.002) * 0.06 + (isBeating ? 0.2 : 0);
+    const roseScale = scale * 0.88 * (1 + bloom);
     const petalLayers = 4;
     for (let layer = petalLayers; layer >= 1; layer--) {
         const petalsInLayer = layer * 3 + 2;
-        const r = (layer / petalLayers) * 14 * roseScale;
+        const r = (layer / petalLayers) * 11 * roseScale;
         const rotOffset = layer * 0.4 + now * 0.0003;
-        const pw = (r / petalLayers) * 1.8;
-        const ph = (r / petalLayers) * 2.4;
+        const pw = (r / petalLayers) * 1.35;
+        const ph = (r / petalLayers) * 1.85;
         for (let i = 0; i < petalsInLayer; i++) {
             const angle = (i / petalsInLayer) * Math.PI * 2 + rotOffset;
             const px = Math.cos(angle) * r * 0.6;
@@ -2084,97 +3823,100 @@ function drawShapeBloomingRose(ctx, scale, now, isBeating, beatScale, theme) {
     ctx.fillStyle = "#fff7a0";
     ctx.globalAlpha = 1.0;
     ctx.beginPath();
-    ctx.arc(0, 0, 4.5 * coreTwinkle * beatScale, 0, Math.PI * 2);
+    ctx.arc(0, 0, 3.2 * coreTwinkle * beatScale, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 }
 
 const orbSnow = [];
-for (let i = 0; i < 35; i++) {
+for (let i = 0; i < 25; i++) {
     orbSnow.push({
-        x: (Math.random() - 0.5) * 60,
-        y: (Math.random() - 0.5) * 60,
-        vy: -Math.random() * 0.4 - 0.1,
-        size: Math.random() * 1.8 + 0.8,
+        x: (Math.random() - 0.5) * 45,
+        y: (Math.random() - 0.5) * 45,
+        vy: -Math.random() * 0.35 - 0.08,
+        size: Math.random() * 1.5 + 0.6,
         sway: Math.random() * Math.PI * 2
     });
 }
 
 function drawShapeMagicOrb(ctx, scale, now, isBeating, beatScale, theme) {
     ctx.save();
-    const orbRadius = 14 * scale;
+    const orbRadius = 9.8 * scale;
     const orbGrd = ctx.createRadialGradient(-orbRadius * 0.35, -orbRadius * 0.35, orbRadius * 0.1, 0, 0, orbRadius);
     orbGrd.addColorStop(0, "rgba(255, 255, 255, 0.65)");
     orbGrd.addColorStop(0.3, "rgba(255, 200, 230, 0.2)");
     orbGrd.addColorStop(0.8, "rgba(30, 10, 50, 0.4)");
     orbGrd.addColorStop(1, "rgba(255, 255, 255, 0.85)");
     ctx.fillStyle = orbGrd;
-    ctx.shadowColor = theme.coreShadow;
-    ctx.shadowBlur = 25;
     ctx.beginPath();
     ctx.arc(0, 0, orbRadius, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = "rgba(255, 255, 255, 0.75)";
-    ctx.lineWidth = 2.2;
+    ctx.lineWidth = 1.8;
     ctx.stroke();
     ctx.save();
     ctx.beginPath();
     ctx.arc(0, 0, orbRadius - 2, 0, Math.PI * 2);
     ctx.clip();
-    for (let s of orbSnow) {
+    for (let i = 0; i < orbSnow.length; i++) {
+        const s = orbSnow[i];
         s.y += s.vy;
         s.sway += 0.02;
-        const sx = s.x + Math.sin(s.sway) * 4;
+        const sx = s.x + Math.sin(s.sway) * 3;
         if (s.y < -orbRadius) { s.y = orbRadius; s.x = (Math.random() - 0.5) * orbRadius * 1.5; }
         ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
         ctx.beginPath();
-        ctx.arc(sx, s.y, s.size, 0, Math.PI * 2);
+        ctx.arc(sx, s.y, s.size * 0.85, 0, Math.PI * 2);
         ctx.fill();
     }
-    const miniScale = scale * 0.48 * beatScale;
+    const miniScale = scale * 0.38 * beatScale;
     ctx.beginPath();
-    for (let t = 0; t <= Math.PI * 2; t += 0.05) {
-        const hp = getHeartPoint(t);
-        ctx.lineTo(hp.x * miniScale, hp.y * miniScale);
+    for (let i = 0; i < LUT_SIZE; i += 6) {
+        const px = HEART_LUT_X[i] * miniScale;
+        const py = HEART_LUT_Y[i] * miniScale;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
     }
     ctx.closePath();
-    const miniGrd = ctx.createRadialGradient(0, -5 * miniScale, 0, 0, 0, 16 * miniScale);
+    const miniGrd = ctx.createRadialGradient(0, -4 * miniScale, 0, 0, 0, 14 * miniScale);
     for (let g of theme.coreGrad) miniGrd.addColorStop(g[0], g[1]);
     ctx.fillStyle = miniGrd;
     ctx.fill();
     ctx.restore();
     ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
     ctx.beginPath();
-    ctx.ellipse(-orbRadius * 0.45, -orbRadius * 0.45, orbRadius * 0.28, orbRadius * 0.12, -Math.PI / 4, 0, Math.PI * 2);
+    ctx.ellipse(-orbRadius * 0.45, -orbRadius * 0.45, orbRadius * 0.25, orbRadius * 0.1, -Math.PI / 4, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 }
 
 function drawShapeInfinityRibbon(ctx, scale, now, isBeating, beatScale, theme) {
     ctx.save();
-    const ribbonScale = scale * 1.15 * beatScale;
+    const ribbonScale = scale * 0.9 * beatScale;
     const ribbonCount = 3;
     for (let r = 0; r < ribbonCount; r++) {
         const offsetPhase = (r / ribbonCount) * Math.PI * 2 + now * 0.002;
         ctx.beginPath();
-        for (let t = 0; t <= Math.PI * 2; t += 0.05) {
-            const hp = getHeartPoint(t);
-            const wave = Math.sin(t * 3 + offsetPhase) * 2.2;
-            const px = (hp.x + Math.cos(t) * wave) * ribbonScale;
-            const py = (hp.y + Math.sin(t) * wave) * ribbonScale;
-            if (t === 0) ctx.moveTo(px, py);
+        for (let i = 0; i < LUT_SIZE; i += 6) {
+            const hx = HEART_LUT_X[i];
+            const hy = HEART_LUT_Y[i];
+            const t = (i / LUT_SIZE) * Math.PI * 2;
+            const wave = Math.sin(t * 3 + offsetPhase) * 1.6;
+            const px = (hx + Math.cos(t) * wave) * ribbonScale;
+            const py = (hy + Math.sin(t) * wave) * ribbonScale;
+            if (i === 0) ctx.moveTo(px, py);
             else ctx.lineTo(px, py);
         }
         ctx.closePath();
-        const ribbonGrd = ctx.createLinearGradient(-15 * ribbonScale, 0, 15 * ribbonScale, 0);
+        const ribbonGrd = ctx.createLinearGradient(-12 * ribbonScale, 0, 12 * ribbonScale, 0);
         ribbonGrd.addColorStop(0, theme.textColor);
         ribbonGrd.addColorStop(0.5, theme.butterflyColor);
         ribbonGrd.addColorStop(1, theme.textColor);
         ctx.strokeStyle = ribbonGrd;
-        ctx.lineWidth = (3.5 - r * 0.8);
+        ctx.lineWidth = (2.6 - r * 0.6);
         ctx.stroke();
     }
-    const starCount = 12;
+    const starCount = 8;
     for (let i = 0; i < starCount; i++) {
         const st = ((now * 0.0004 + (i / starCount) * Math.PI * 2) % (Math.PI * 2));
         const hp = getHeartPoint(st);
@@ -2182,7 +3924,7 @@ function drawShapeInfinityRibbon(ctx, scale, now, isBeating, beatScale, theme) {
         const py = hp.y * ribbonScale;
         ctx.fillStyle = "#ffffff";
         ctx.beginPath();
-        ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+        ctx.arc(px, py, 2.0, 0, Math.PI * 2);
         ctx.fill();
     }
     ctx.restore();
@@ -2190,30 +3932,33 @@ function drawShapeInfinityRibbon(ctx, scale, now, isBeating, beatScale, theme) {
 
 function drawShapePureGlassHeart(ctx, scale, now, isBeating, beatScale, theme) {
     ctx.save();
-    const glassScale = scale * 1.05 * beatScale;
+    const glassScale = scale * 0.95 * beatScale;
     ctx.beginPath();
-    for (let t = 0; t <= Math.PI * 2; t += 0.04) {
-        const hp = getHeartPoint(t);
-        ctx.lineTo(hp.x * glassScale, hp.y * glassScale);
+    for (let i = 0; i < LUT_SIZE; i += 4) {
+        const px = HEART_LUT_X[i] * glassScale;
+        const py = HEART_LUT_Y[i] * glassScale;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
     }
     ctx.closePath();
-    const glassGrd = ctx.createRadialGradient(0, -8 * glassScale, 0, 0, 0, 18 * glassScale);
+    const glassGrd = ctx.createRadialGradient(0, -6 * glassScale, 0, 0, 0, 16 * glassScale);
     for (let g of theme.coreGrad) glassGrd.addColorStop(g[0], g[1]);
     ctx.fillStyle = glassGrd;
     ctx.fill();
-    ctx.lineWidth = 2.2;
+    ctx.lineWidth = 1.8;
     ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
     ctx.stroke();
     ctx.beginPath();
-    for (let t = Math.PI * 0.65; t <= Math.PI * 0.95; t += 0.04) {
-        const hp = getHeartPoint(t);
-        const px = hp.x * glassScale * 0.88;
-        const py = hp.y * glassScale * 0.88;
-        if (t === Math.PI * 0.65) ctx.moveTo(px, py);
+    const startIdx = Math.floor(LUT_SIZE * 0.325);
+    const endIdx = Math.floor(LUT_SIZE * 0.475);
+    for (let i = startIdx; i <= endIdx; i += 4) {
+        const px = HEART_LUT_X[i] * glassScale * 0.88;
+        const py = HEART_LUT_Y[i] * glassScale * 0.88;
+        if (i === startIdx) ctx.moveTo(px, py);
         else ctx.lineTo(px, py);
     }
     ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.lineWidth = 3.5;
+    ctx.lineWidth = 2.6;
     ctx.stroke();
     ctx.restore();
 }
@@ -2222,8 +3967,8 @@ function drawShapePureGlassHeart(ctx, scale, now, isBeating, beatScale, theme) {
 // 8. BƯỚM DẠ QUANG & TƯƠNG TÁC CLICK
 // ==========================================
 const butterflies = [
-    { t: 0, speed: 0.007, radiusX: 130, radiusY: 85, phase: 0 },
-    { t: Math.PI, speed: 0.0055, radiusX: 165, radiusY: 105, phase: Math.PI / 2 }
+    { t: 0, speed: 0.007, radiusX: 88, radiusY: 58, phase: 0 },
+    { t: Math.PI, speed: 0.0055, radiusX: 112, radiusY: 72, phase: Math.PI / 2 }
 ];
 
 function drawButterfly(ctx, cx, cy, b, now) {
@@ -2280,7 +4025,7 @@ function handleCombo(x, y) {
 }
 
 const ambientParticles = [];
-for (let i = 0; i < 45; i++) {
+for (let i = 0; i < 24; i++) {
     ambientParticles.push({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -2294,7 +4039,7 @@ for (let i = 0; i < 45; i++) {
 }
 
 const layer2Particles = [];
-for (let i = 0; i < 220; i++) {
+for (let i = 0; i < 100; i++) {
     layer2Particles.push({
         t: Math.random() * Math.PI * 2,
         speed: Math.random() * 0.004 + 0.002,
@@ -2494,13 +4239,15 @@ function updateAndDrawThemeAtmosphere(ctx, now, cx, cy) {
 // ==========================================
 const startTime = performance.now();
 
+const bgLayerElement = document.querySelector(".background");
+
 function render(now) {
     const elapsed = now - startTime;
     ctx.clearRect(0, 0, width, height);
 
     curTiltX += (targetTiltX - curTiltX) * 0.06;
     curTiltY += (targetTiltY - curTiltY) * 0.06;
-    if (bgLayer) bgLayer.style.transform = `translate(${curTiltX * 12}px, ${curTiltY * 12}px) scale(1.06)`;
+    if (bgLayerElement) bgLayerElement.style.transform = `translate(${curTiltX * 12}px, ${curTiltY * 12}px) scale(1.06)`;
 
     // 0. Hiệu ứng môi trường riêng biệt theo từng loại nền:
     const targetGalaxyBgAlpha = curBgMode.isGalaxyBg ? 1.0 : 0.0;
@@ -2635,17 +4382,18 @@ function render(now) {
             const beatProgress = beatElapsed / duration;
             const p1 = Math.sin(Math.min(1, beatProgress * 2.8) * Math.PI);
             const p2 = Math.sin(Math.max(0, Math.min(1, (beatProgress - 0.28) * 2.8)) * Math.PI);
-            clickBeatScale = 1.0 + p1 * 0.18 + p2 * 0.32;
+            clickBeatScale = 1.0 + p1 * 0.25 + p2 * 0.45;
         } else isBeating = false;
     }
     let introScale = Math.min(elapsed / 1500, 1.0);
     introScale = 1 - Math.pow(1 - introScale, 3);
-    const finalScale = currentScale * idleBreathing * introScale;
+    const baseScreenRatio = Math.min(1.0, Math.max(0.72, Math.min(width, height) / 720));
+    const finalScale = currentScale * idleBreathing * introScale * baseScreenRatio;
     const outerOpacity = Math.max(0, Math.min((elapsed - 1200) / 1000, 1.0));
 
     curHeartVisAlpha += (curBgMode.heartTargetAlpha - curHeartVisAlpha) * 0.05;
 
-    const scaleBase = finalScale * 5.2;
+    const scaleBase = finalScale * 3.4 * (isBeating ? clickBeatScale : 1.0);
     if (introScale > 0 && curHeartVisAlpha > 0.01) {
         ctx.save();
         ctx.globalAlpha = curHeartVisAlpha;
@@ -2653,15 +4401,19 @@ function render(now) {
             case "galaxy":
                 drawShapeGalaxyHeart(ctx, scaleBase, now, isBeating, clickBeatScale, curTheme);
                 break;
+            case "flower":
             case "rose":
                 drawShapeBloomingRose(ctx, scaleBase, now, isBeating, clickBeatScale, curTheme);
                 break;
+            case "sphere":
             case "orb":
                 drawShapeMagicOrb(ctx, scaleBase, now, isBeating, clickBeatScale, curTheme);
                 break;
+            case "ribbon":
             case "infinity":
                 drawShapeInfinityRibbon(ctx, scaleBase, now, isBeating, clickBeatScale, curTheme);
                 break;
+            case "crystal":
             case "glass":
             default:
                 drawShapePureGlassHeart(ctx, scaleBase, now, isBeating, clickBeatScale, curTheme);
@@ -2670,8 +4422,9 @@ function render(now) {
         ctx.restore();
     }
 
-    const scaleL2 = finalScale * 9.2;
-    if (outerOpacity > 0 && curHeartVisAlpha > 0.01 && (curShape.id === "glass" || curShape.id === "galaxy" || curShape.id === "infinity")) {
+    const hasOuterLayers = (curShape.id === "crystal" || curShape.id === "glass" || curShape.id === "galaxy" || curShape.id === "ribbon" || curShape.id === "infinity");
+    const scaleL2 = finalScale * 5.8 * (isBeating ? (1.0 + (clickBeatScale - 1.0) * 0.65) : 1.0);
+    if (outerOpacity > 0 && curHeartVisAlpha > 0.01 && hasOuterLayers) {
         for (let i = 0; i < layer2Particles.length; i++) {
             const p = layer2Particles[i];
             p.t += p.speed;
@@ -2684,34 +4437,32 @@ function render(now) {
             ctx.fillStyle = curTheme.particleColor;
             if (p.isPetal) {
                 ctx.beginPath();
-                ctx.ellipse(px, py, p.size * 1.6 * finalScale, p.size * finalScale, p.t, 0, Math.PI * 2);
+                ctx.ellipse(px, py, p.size * 1.3 * finalScale, p.size * 0.85 * finalScale, p.t, 0, Math.PI * 2);
                 ctx.fill();
             } else {
                 ctx.beginPath();
-                ctx.arc(px, py, p.size * finalScale, 0, Math.PI * 2);
+                ctx.arc(px, py, p.size * 0.85 * finalScale, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
     }
 
-    if (outerOpacity > 0 && curHeartVisAlpha > 0.01 && (curShape.id === "glass" || curShape.id === "infinity" || curShape.id === "galaxy")) {
+    if (outerOpacity > 0 && curHeartVisAlpha > 0.01 && hasOuterLayers) {
         ctx.save();
         ctx.globalAlpha = outerOpacity * curHeartVisAlpha;
-        const scaleL3 = finalScale * 11.6;
-        const fontSize = Math.max(18, Math.round(23 * finalScale));
+        const scaleL3 = finalScale * 7.4;
+        const fontSize = Math.max(12, Math.round(14.5 * finalScale));
         ctx.font = `800 ${fontSize}px 'Dancing Script', cursive, sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
         const textString = "  I  L O V E  Y O U  ♥  ";
         const textArr = textString.split("");
-        const totalChars = 56;
+        const totalChars = 36;
         const textOffsetT = (now * 0.00025) % (Math.PI * 2);
 
         ctx.globalCompositeOperation = "lighter";
         ctx.fillStyle = "#ffffff";
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 0.8 * finalScale;
 
         for (let i = 0; i < totalChars; i++) {
             let t = (i / totalChars) * Math.PI * 2 + textOffsetT;
@@ -2724,7 +4475,6 @@ function render(now) {
             ctx.translate(pos.x * scaleL3, pos.y * scaleL3);
             ctx.rotate(angle);
             ctx.fillText(char, 0, 0);
-            ctx.strokeText(char, 0, 0);
             ctx.restore();
         }
         ctx.restore();
@@ -2823,13 +4573,24 @@ function initCatSquad() {
                 e.stopPropagation();
             }
 
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx && audioCtx.state === "suspended") {
-                audioCtx.resume();
-            }
+            const now = Date.now();
+            if (now - (cat._lastClick || 0) < 300) return;
+            cat._lastClick = now;
+
+            ensureAudioContext();
 
             const catType = cat.getAttribute("data-cat") || "white";
             const quote = CAT_QUOTES[catType] || CAT_QUOTES.white;
+            const bubble = cat.querySelector(".cat-bubble");
+
+            // Nếu đang phát tiếng của bé mèo này -> Bấm để tắt ngay lập tức
+            if (bubble && bubble.classList.contains("active") && isVoiceSpeaking) {
+                stopAllVoicesAndDialogues(false);
+                return;
+            }
+
+            // Dừng mọi âm thanh và lời thoại khác trước khi phát bé mèo này
+            stopAllVoicesAndDialogues(true);
 
             // 1. Bé mèo nhún nhảy nhẹ trong khi vẫn quẩy vũ đạo liên tục
             cat.classList.remove("jump");
@@ -2837,7 +4598,6 @@ function initCatSquad() {
             cat.classList.add("jump");
 
             // 2. Hiện bong bóng thoại khớp 100% từng từ với giọng đọc
-            const bubble = cat.querySelector(".cat-bubble");
             if (bubble) {
                 bubble.textContent = quote;
                 bubble.classList.add("active");
@@ -2920,13 +4680,24 @@ function initGooseSquad() {
                 e.stopPropagation();
             }
 
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx && audioCtx.state === "suspended") {
-                audioCtx.resume();
-            }
+            const now = Date.now();
+            if (now - (goose._lastClick || 0) < 300) return;
+            goose._lastClick = now;
+
+            ensureAudioContext();
 
             const gooseType = goose.getAttribute("data-goose") || "white";
             const quote = GOOSE_QUOTES[gooseType] || GOOSE_QUOTES.white;
+            const bubble = goose.querySelector(".goose-bubble");
+
+            // Nếu đang phát tiếng của bé ngỗng này -> Bấm để tắt ngay lập tức
+            if (bubble && bubble.classList.contains("active") && isVoiceSpeaking) {
+                stopAllVoicesAndDialogues(false);
+                return;
+            }
+
+            // Dừng mọi âm thanh và lời thoại khác trước khi phát bé ngỗng này
+            stopAllVoicesAndDialogues(true);
 
             // 1. Bé ngỗng nhún nảy nhẹ
             goose.classList.remove("jump");
@@ -2934,7 +4705,6 @@ function initGooseSquad() {
             goose.classList.add("jump");
 
             // 2. Hiện bong bóng thoại khớp với giọng đọc
-            const bubble = goose.querySelector(".goose-bubble");
             if (bubble) {
                 bubble.textContent = quote;
                 bubble.classList.add("active");
@@ -2955,6 +4725,63 @@ function initGooseSquad() {
 initGooseSquad();
 
 // ==========================================
+// 10.4 SINGLE TOP-RIGHT HEART MENU CONTROLLER (NÚT TRÁI TIM DUY NHẤT ❤️)
+// ==========================================
+const heartMenuWrapper = document.getElementById("heartMenuWrapper");
+const heartMenuToggleBtn = document.getElementById("heartMenuToggleBtn");
+const heartDropdownMenu = document.getElementById("heartDropdownMenu");
+
+function toggleHeartMenu(forceState) {
+    if (!heartMenuWrapper || !heartDropdownMenu) return;
+    const shouldOpen = typeof forceState === "boolean" ? forceState : !heartDropdownMenu.classList.contains("open");
+
+    if (shouldOpen) {
+        heartDropdownMenu.classList.add("open");
+        heartMenuWrapper.classList.add("open");
+        if (heartMenuToggleBtn) heartMenuToggleBtn.setAttribute("aria-expanded", "true");
+        heartDropdownMenu.setAttribute("aria-hidden", "false");
+        if (audioCtx) playChimeNote(659.25, 0, 0.2);
+    } else {
+        heartDropdownMenu.classList.remove("open");
+        heartMenuWrapper.classList.remove("open");
+        if (heartMenuToggleBtn) heartMenuToggleBtn.setAttribute("aria-expanded", "false");
+        heartDropdownMenu.setAttribute("aria-hidden", "true");
+    }
+}
+
+function closeHeartMenu() {
+    toggleHeartMenu(false);
+}
+
+if (heartMenuToggleBtn) {
+    heartMenuToggleBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleHeartMenu();
+    });
+}
+
+// Click outside or press Escape to close Heart Menu
+document.addEventListener("click", (e) => {
+    if (heartMenuWrapper && !heartMenuWrapper.contains(e.target)) {
+        closeHeartMenu();
+    }
+});
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+        closeHeartMenu();
+    }
+});
+
+// Tự động đóng Heart Menu khi click vào các nút chức năng bên trong
+const dropdownItemBtns = document.querySelectorAll(".dropdown-item-btn");
+dropdownItemBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+        setTimeout(() => closeHeartMenu(), 180);
+    });
+});
+
+// ==========================================
 // 10.5 FLOATING CONTROL HUB CONTROLLER (TRUNG TÂM TIỆN ÍCH TINH GỌN)
 // ==========================================
 const controlHubModal = document.getElementById("controlHubModal");
@@ -2964,6 +4791,7 @@ const hubBackdrop = document.getElementById("hubBackdrop");
 
 function openControlHub() {
     if (!controlHubModal) return;
+    closeHeartMenu();
     controlHubModal.classList.add("open");
     if (audioCtx) {
         playChimeNote(659.25, 0, 0.4);
@@ -3003,140 +4831,155 @@ hubItemBtns.forEach(btn => {
 });
 
 // ==========================================
-// 11. COMPLETE STEP-BY-STEP GUIDED TOUR SYSTEM (HƯỚNG DẪN TỪ ĐẦU ĐẾN CUỐI)
+// 11. INTERACTIVE GUIDED TOUR
 // ==========================================
 const TOUR_STEPS = [
     {
         target: "#heartCanvas",
-        title: "💖 Bước 1: Trái Tim 3D",
-        desc: "Xin chào Kim Thanh! Chạm vào tim để bùng nổ vũ trụ lung linh nha! ✨",
-        voice: "Xin chào Kim Thanh! Chạm vào tim để bùng nổ vũ trụ lung linh nha!",
+        targetId: "heartCanvas",
+        title: "💖 Bước 1: Trái Tim 3D Tương Tác",
+        desc: "Chạm vào trái tim để bùng nổ hiệu ứng nhịp đập & sóng ánh sáng lung linh!",
+        voice: "Chạm vào trái tim để bùng nổ hiệu ứng nhịp đập và sóng ánh sáng lung linh!",
         audio: "tour_step_1.mp3",
-        placement: "center",
-        closeHub: true
-    },
-    {
-        target: "#hubToggleBtn",
-        title: "✨ Bước 2: Menu Tiện Ích",
-        desc: "Menu Điều Khiển mở ra toàn bộ tính năng tùy biến không gian tình yêu! ⚙️",
-        voice: "Menu Điều Khiển mở ra toàn bộ tính năng tùy biến không gian tình yêu!",
-        audio: "tour_step_2.mp3",
-        placement: "bottom",
-        closeHub: true
-    },
-    {
-        target: "#shapeToggle",
-        title: "🌌 Bước 3: Đổi Kiểu Dáng Tim",
-        desc: "Chọn 5 kiểu dáng độc đáo: Thiên Hà, Hoa Hồng, Quả Cầu, Vô Cực hoặc Pha Lê! 🌸",
-        voice: "Chọn năm kiểu dáng độc đáo: Thiên Hà, Hoa Hồng, Quả Cầu, Vô Cực hoặc Pha Lê!",
-        audio: "tour_step_3.mp3",
-        placement: "bottom",
-        openHub: true
-    },
-    {
-        target: "#themeToggle",
-        title: "👑 Bước 4: 10 Sắc Màu & Thính",
-        desc: "Tùy chọn 10 tông màu lung linh kèm cốt truyện và giọng kể riêng biệt! 🎨",
-        voice: "Tùy chọn mười tông màu lung linh kèm cốt truyện và giọng kể riêng biệt!",
-        audio: "tour_step_4.mp3",
-        placement: "bottom",
-        openHub: true
-    },
-    {
-        target: "#bgModeToggle",
-        title: "🖼️ Bước 5: Không Gian Hình Nền",
-        desc: "Đổi chế độ nền: Nền Chuẩn, Hoa Anh Đào, Thiên Hà 3D hoặc Thuần Khiết! 🌌",
-        voice: "Đổi chế độ nền: Nền Chuẩn, Hoa Anh Đào, Thiên Hà Ba Đê hoặc Thuần Khiết!",
-        audio: "tour_step_5.mp3",
-        placement: "bottom",
-        openHub: true
-    },
-    {
-        target: "#fireworksBtn",
-        title: "🎆 Bước 6: Bắn Pháo Hoa Trái Tim",
-        desc: "Bắn những chùm pháo hoa trái tim rực rỡ bùng nổ khắp bầu trời đêm! ✨",
-        voice: "Bắn những chùm pháo hoa trái tim rực rỡ bùng nổ khắp bầu trời đêm!",
-        audio: "tour_step_6.mp3",
         placement: "bottom",
         closeHub: true
     },
     {
         target: "#loveDaysWidget",
-        title: "⏳ Bước 7: Đồng Hồ Đếm Ngày Yêu",
-        desc: "Đồng hồ tình yêu đếm từng giây từng phút kỷ niệm bên nhau ngọt ngào! 💕",
-        voice: "Đồng hồ tình yêu đếm từng giây từng phút kỷ niệm bên nhau ngọt ngào!",
-        audio: "tour_step_7.mp3",
+        targetId: "loveDaysWidget",
+        title: "⏳ Bước 2: Đồng Hồ Đếm Ngày Yêu",
+        desc: "Đồng hồ đếm từng giây phút bên nhau và ghi dấu tên kỷ niệm ngọt ngào của hai bạn!",
+        voice: "Đồng hồ đếm từng giây phút bên nhau và ghi dấu tên kỷ niệm ngọt ngào của hai bạn!",
+        audio: "tour_step_2.mp3",
         placement: "bottom",
         closeHub: true
     },
     {
-        target: "#nameEditorBtn",
-        title: "✍️ Bước 8: Đổi Tên & Lời Chúc",
-        desc: "Tùy chỉnh tên người thương, ngày kỷ niệm và bức thư tình theo ý bạn! 💌",
-        voice: "Tùy chỉnh tên người thương, ngày kỷ niệm và bức thư tình theo ý bạn!",
-        audio: "tour_step_8.mp3",
+        target: "#heartMenuToggleBtn",
+        targetId: "heartMenuToggleBtn",
+        title: "❤️ Bước 3: Nút Menu Trái Tim",
+        desc: "Bấm vào nút Trái Tim ở góc trên bên phải để mở ngay Menu Tiện Ích Đa Năng!",
+        voice: "Bấm vào nút Trái Tim ở góc trên bên phải để mở ngay Menu Tiện Ích Đa Năng!",
+        audio: "tour_step_3.mp3",
+        placement: "bottom",
+        closeHub: true
+    },
+    {
+        target: "#shapeToggle",
+        targetId: "shapeToggle",
+        title: "🌌 Bước 4: 5 Kiểu Dáng Trái Tim",
+        desc: "Khám phá 5 kiểu dáng độc quyền: Thiên Hà 3D, Hoa Hồng, Quả Cầu, Lụa Vô Cực và Pha Lê!",
+        voice: "Khám phá 5 kiểu dáng độc quyền: Thiên Hà 3D, Hoa Hồng, Quả Cầu, Lụa Vô Cực và Pha Lê!",
+        audio: "tour_step_4.mp3",
+        placement: "bottom",
+        openHub: true
+    },
+    {
+        target: "#themeToggle",
+        targetId: "themeToggle",
+        title: "🎨 Bước 5: 10 Tông Màu Nghệ Thuật",
+        desc: "Đổi màu sắc yêu thích với 10 chủ đề: Hồng Ngọt Ngào, Tím Vũ Trụ, Hoàng Gia, Băng Tuyết...",
+        voice: "Đổi màu sắc yêu thích với 10 chủ đề: Hồng Ngọt Ngào, Tím Vũ Trụ, Hoàng Gia, Băng Tuyết...",
+        audio: "tour_step_5.mp3",
+        placement: "bottom",
+        openHub: true
+    },
+    {
+        target: "#bgModeToggle",
+        targetId: "bgModeToggle",
+        title: "🖼️ Bước 6: 4 Chế Độ Nền Sống Động",
+        desc: "Chuyển đổi linh hoạt giữa Nền Chuẩn, Nền Hoa Anh Đào, Nền Thiên Hà 3D và Nền Thuần Khiết!",
+        voice: "Chuyển đổi linh hoạt giữa Nền Chuẩn, Nền Hoa Anh Đào, Nền Thiên Hà 3D và Nền Thuần Khiết!",
+        audio: "tour_step_6.mp3",
         placement: "bottom",
         openHub: true
     },
     {
         target: "#musicGenreToggle",
-        title: "🎸 Bước 9: Đổi Ca Sĩ Thần Tượng",
-        desc: "Chuyển đổi giữa dòng nhạc Acoustic của Vũ và Sơn Tùng M-TP sôi động! 🔥",
-        voice: "Chuyển đổi giữa dòng nhạc Acoustic của Vũ và Sơn Tùng M-TP sôi động!",
+        targetId: "musicGenreToggle",
+        title: "🎵 Bước 7: Đổi Ca Sĩ & Âm Nhạc",
+        desc: "Chuyển đổi giữa dòng nhạc Acoustic trầm ấm của Vũ. và Pop R&B sôi động của Sơn Tùng M-TP!",
+        voice: "Chuyển đổi giữa dòng nhạc Acoustic trầm ấm của Vũ và Pop R&B sôi động của Sơn Tùng M-TP!",
+        audio: "tour_step_7.mp3",
+        placement: "bottom",
+        openHub: true
+    },
+    {
+        target: "#hubFireworksBtn",
+        targetId: "hubFireworksBtn",
+        title: "🎆 Bước 8: Bắn Pháo Hoa Trái Tim",
+        desc: "Thắp sáng bầu trời tình yêu với pháo hoa trái tim rực rỡ lung linh muôn sắc màu!",
+        voice: "Thắp sáng bầu trời tình yêu với pháo hoa trái tim rực rỡ lung linh muôn sắc màu!",
+        audio: "tour_step_8.mp3",
+        placement: "bottom",
+        openHub: true
+    },
+    {
+        target: "#nameEditorBtn",
+        targetId: "nameEditorBtn",
+        title: "✨ Bước 9: Tùy Chỉnh Tên & Dòng Kỷ Niệm",
+        desc: "Cá nhân hóa tên hai bạn, thiết lập ngày yêu và lưu trữ trọn vẹn toàn bộ dòng thời gian kỷ niệm ngọt ngào!",
+        voice: "Cá nhân hóa tên hai bạn, thiết lập ngày yêu và lưu trữ trọn vẹn toàn bộ dòng thời gian kỷ niệm ngọt ngào!",
         audio: "tour_step_9.mp3",
         placement: "bottom",
         openHub: true
     },
     {
         target: "#openPlaylistBtn",
-        title: "🎵 Bước 10: Kho Nhạc Bản Gốc",
-        desc: "Chọn bài hát yêu thích hoặc tải lên file nhạc MP3 từ máy của bạn! 🎧",
-        voice: "Chọn bài hát yêu thích hoặc tải lên file nhạc MP3 từ máy của bạn!",
+        targetId: "openPlaylistBtn",
+        title: "🎧 Bước 10: Kho Nhạc Tình Ca",
+        desc: "Mở danh sách phát nhạc để chuyển bài hát yêu thích hoặc tải lên bài nhạc MP3 từ máy của bạn!",
+        voice: "Mở danh sách phát nhạc để chuyển bài hát yêu thích hoặc tải lên bài nhạc MP3 từ máy của bạn!",
         audio: "tour_step_10.mp3",
         placement: "bottom",
         openHub: true
     },
     {
         target: "#letterBtn",
-        title: "💌 Bước 11: Bức Thư Tình Bí Mật",
-        desc: "Mở phong thư tình lãng mạn với hiệu ứng gõ chữ tự động ấm áp! 📜",
-        voice: "Mở phong thư tình lãng mạn với hiệu ứng gõ chữ tự động ấm áp!",
+        targetId: "letterBtn",
+        title: "💌 Bước 11: Hộp Thư Đôi & Lưu Trữ Lịch Sử",
+        desc: "Mở Hộp Thư Đôi để xem toàn bộ lịch sử thư tình, viết thư hồi đáp cho nhau và lưu giữ kỷ niệm ngọt ngào của hai bạn!",
+        voice: "Mở Hộp Thư Đôi để xem toàn bộ lịch sử thư tình, viết thư hồi đáp cho nhau và lưu giữ kỷ niệm ngọt ngào của hai bạn!",
         audio: "tour_step_11.mp3",
         placement: "bottom",
         openHub: true
     },
     {
         target: "#authorBtn",
-        title: "👑 Bước 12: Tác Giả Mai IT",
-        desc: "Thông tin tác giả Mai IT, người sáng tạo không gian vũ trụ trái tim này! 💻",
-        voice: "Thông tin tác giả Mai IT, người sáng tạo không gian vũ trụ trái tim này!",
+        targetId: "authorBtn",
+        title: "👨‍💻 Bước 12: Thông Tin Tác Giả",
+        desc: "Khám phá profile của chàng lập trình viên Mai IT đã sáng tạo nên món quà tuyệt vời này!",
+        voice: "Khám phá profile của chàng lập trình viên Mai IT đã sáng tạo nên món quà tuyệt vời này!",
         audio: "tour_step_12.mp3",
         placement: "bottom",
         openHub: true
     },
     {
         target: "#catSquad",
-        title: "🐾 Bước 13: Hội Bé Mèo Nhảy Múa",
-        desc: "Bấm vào 4 bé mèo đang quẩy TikTok, Vinahouse và Hiphop siêu đáng yêu! 🐱",
-        voice: "Bấm vào bốn bé mèo đang quẩy TikTok, Vinahouse và Hiphop siêu đáng yêu!",
+        targetId: "catSquad",
+        title: "🐱 Bước 13: Hội Bé Mèo Siêu Quậy",
+        desc: "Chạm vào các bé mèo đáng yêu ở góc phải dưới để xem vũ đạo vui nhộn và nghe lời chúc!",
+        voice: "Chạm vào các bé mèo đáng yêu ở góc phải dưới để xem vũ đạo vui nhộn và nghe lời chúc!",
         audio: "tour_step_13.mp3",
         placement: "top",
         closeHub: true
     },
     {
         target: "#gooseSquad",
-        title: "🪿 Bước 14: Đôi Bé Ngỗng Quẩy Dễ Thương",
-        desc: "Bấm vào đôi bé ngỗng ở góc trái đang quẩy Disco Waddle và Honk Honk siêu hài hước! 🪿✨",
-        voice: "Bước mười bốn. Bấm vào đôi bé ngỗng ở góc trái đang quẩy đít co và hông hông siêu hài hước nhé!",
+        targetId: "gooseSquad",
+        title: "🪿 Bước 14: Đôi Bé Ngỗng Quẩy Cute",
+        desc: "Chạm vào đôi bé ngỗng ở góc trái dưới để nghe tiếng cạp cạp và quẩy theo điệu nhạc!",
+        voice: "Chạm vào đôi bé ngỗng ở góc trái dưới để nghe tiếng cạp cạp và quẩy theo điệu nhạc!",
         audio: "tour_step_14.mp3",
         placement: "top",
         closeHub: true
     },
     {
-        target: "#musicToggle",
-        title: "💿 Bước 15: Đĩa Nhạc & Bụi Tiên",
-        desc: "Bật tắt nhạc nền và di chuột để trải nghiệm vệt bụi tiên diệu kỳ nhé! Chúc bạn luôn hạnh phúc! 🪄✨",
-        voice: "Bước mười lăm. Bật tắt nhạc nền và di chuột để trải nghiệm vệt bụi tiên diệu kỳ nhé! Chúc hai bạn luôn hạnh phúc bên nhau!",
+        target: "#heartMenuToggleBtn",
+        targetId: "heartMenuToggleBtn",
+        title: "✨ Bước 15: Bắt Đầu Khám Phá!",
+        desc: "Bạn có thể bấm vào nút Trái Tim này bất kỳ lúc nào để xem lại hướng dẫn hoặc khám phá tiện ích!",
+        voice: "Bạn có thể bấm vào nút Trái Tim này bất kỳ lúc nào để xem lại hướng dẫn hoặc khám phá tiện ích!",
         audio: "tour_step_15.mp3",
         placement: "bottom",
         closeHub: true
@@ -3167,14 +5010,15 @@ let tourVoiceTimer = null;
 
 // Phát chuông phép thuật nhẹ nhàng vui tươi
 function playTourMagicChime() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === "suspended") audioCtx.resume();
+    if (!hasUserInteracted) return;
+    ensureAudioContext();
+    if (!audioCtx || audioCtx.state !== "running") return;
     playChimeNote(659.25, 0, 0.25); // E5
     playChimeNote(880.00, 0.06, 0.35); // A5
     playChimeNote(1046.50, 0.12, 0.45); // C6
 }
 
-// Phát giọng nói hướng dẫn tiếng Việt 100% chuẩn xác qua file MP3 Studio
+// Phát giọng nói hướng dẫn tiếng Việt 100% chuẩn xác qua file MP3 Studio hoặc Web Speech
 function speakTourVoice(step) {
     if (!step) return;
     pauseMusicForVoice();
@@ -3187,6 +5031,8 @@ function speakTourVoice(step) {
         tourVoiceAudio.pause();
         tourVoiceAudio.currentTime = 0;
 
+        const voiceText = step.voice || step.desc;
+
         if (step.audio) {
             tourVoiceAudio.src = step.audio;
             tourVoiceAudio.onended = () => {
@@ -3198,9 +5044,41 @@ function speakTourVoice(step) {
             const playPromise = tourVoiceAudio.play();
             if (playPromise !== undefined) {
                 playPromise.catch(() => {
-                    isVoiceSpeaking = false;
-                    // Khi vừa tải trang chưa chạm màn hình, trình duyệt sẽ chờ lượt click đầu tiên
+                    // Fallback Web Speech Synthesis nếu audio bị chặn
+                    if ('speechSynthesis' in window && voiceText) {
+                        try {
+                            window.speechSynthesis.cancel();
+                            const utter = new SpeechSynthesisUtterance(voiceText);
+                            utter.lang = 'vi-VN';
+                            utter.rate = 1.0;
+                            const voices = window.speechSynthesis.getVoices();
+                            const viVoice = voices.find(v => (v.lang && (v.lang.startsWith("vi") || v.lang.includes("VN"))) || (v.name && (v.name.toLowerCase().includes("vietnam") || v.name.toLowerCase().includes("vietnamese"))));
+                            if (viVoice) utter.voice = viVoice;
+                            utter.onend = () => { isVoiceSpeaking = false; };
+                            utter.onerror = () => { isVoiceSpeaking = false; };
+                            window.speechSynthesis.speak(utter);
+                        } catch (e) {
+                            isVoiceSpeaking = false;
+                        }
+                    } else {
+                        isVoiceSpeaking = false;
+                    }
                 });
+            }
+        } else if ('speechSynthesis' in window && voiceText) {
+            try {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(voiceText);
+                utter.lang = 'vi-VN';
+                utter.rate = 1.0;
+                const voices = window.speechSynthesis.getVoices();
+                const viVoice = voices.find(v => (v.lang && (v.lang.startsWith("vi") || v.lang.includes("VN"))) || (v.name && (v.name.toLowerCase().includes("vietnam") || v.name.toLowerCase().includes("vietnamese"))));
+                if (viVoice) utter.voice = viVoice;
+                utter.onend = () => { isVoiceSpeaking = false; };
+                utter.onerror = () => { isVoiceSpeaking = false; };
+                window.speechSynthesis.speak(utter);
+            } catch (e) {
+                isVoiceSpeaking = false;
             }
         }
     }, 80);
@@ -3235,11 +5113,21 @@ function updateTourPosition() {
     const step = TOUR_STEPS[currentTourStep];
     if (!step) return;
 
+    // Đảm bảo window không bao giờ bị scroll lệch ngang
+    if (window.scrollX !== 0 || window.scrollY !== 0) {
+        window.scrollTo(0, 0);
+    }
+    if (document.documentElement.scrollLeft !== 0) document.documentElement.scrollLeft = 0;
+    if (document.body.scrollLeft !== 0) document.body.scrollLeft = 0;
+
     const el = document.querySelector(step.target);
     const winW = window.innerWidth;
     const winH = window.innerHeight;
 
     let targetRect;
+    let isRoundTarget = false;
+    let customRadius = "20px";
+
     if (step.target === "#heartCanvas" || !el) {
         const size = Math.min(260, winW * 0.65);
         targetRect = {
@@ -3250,102 +5138,226 @@ function updateTourPosition() {
             right: (winW + size) / 2,
             bottom: (winH + size) / 2 - 20
         };
+        isRoundTarget = true;
+        customRadius = "50%";
     } else {
-        const r = el.getBoundingClientRect();
-        targetRect = {
-            left: r.left - 4,
-            top: r.top - 4,
-            width: r.width + 8,
-            height: r.height + 8,
-            right: r.right + 4,
-            bottom: r.bottom + 4
-        };
+        let targetEl = el;
+        if (step.target === "#shapeToggle" || step.target === "#themeToggle" || step.target === "#bgModeToggle" || step.target === "#musicGenreToggle") {
+            targetEl = el.closest(".hub-item-group") || el;
+        }
+
+        let r = targetEl.getBoundingClientRect();
+        if ((r.width === 0 || r.height === 0 || r.top < -500) && el.closest("#heartDropdownMenu")) {
+            const fallback = document.getElementById("heartMenuToggleBtn");
+            if (fallback) r = fallback.getBoundingClientRect();
+        }
+
+        // Tùy chỉnh padding và bo góc chính xác 100% theo từng phần tử
+        if (el.classList.contains("heart-menu-btn") || step.target === "#heartMenuToggleBtn") {
+            const pad = 4;
+            targetRect = {
+                left: r.left - pad,
+                top: r.top - pad,
+                width: r.width + pad * 2,
+                height: r.height + pad * 2,
+                right: r.right + pad,
+                bottom: r.bottom + pad
+            };
+            isRoundTarget = true;
+            customRadius = "50%";
+        } else if (el.classList.contains("love-days-widget") || step.target === "#loveDaysWidget") {
+            const padX = 6;
+            const padY = 4;
+            targetRect = {
+                left: r.left - padX,
+                top: r.top - padY,
+                width: r.width + padX * 2,
+                height: r.height + padY * 2,
+                right: r.right + padX,
+                bottom: r.bottom + padY
+            };
+            customRadius = "28px";
+        } else if (step.target === "#catSquad" || step.target === "#gooseSquad") {
+            const pad = 8;
+            targetRect = {
+                left: r.left - pad,
+                top: r.top - pad,
+                width: r.width + pad * 2,
+                height: r.height + pad * 2,
+                right: r.right + pad,
+                bottom: r.bottom + pad
+            };
+            customRadius = "24px";
+        } else {
+            const padX = 6;
+            const padY = 5;
+            targetRect = {
+                left: r.left - padX,
+                top: r.top - padY,
+                width: r.width + padX * 2,
+                height: r.height + padY * 2,
+                right: r.right + padX,
+                bottom: r.bottom + padY
+            };
+            customRadius = "20px";
+        }
     }
 
-    // Cập nhật vị trí Spotlight chính xác theo tọa độ pixel thực tế
+    // Cập nhật vị trí Spotlight chính xác pixel-perfect ngay lập tức (không trễ)
     tourSpotlight.style.left = `${Math.round(targetRect.left)}px`;
     tourSpotlight.style.top = `${Math.round(targetRect.top)}px`;
     tourSpotlight.style.width = `${Math.round(targetRect.width)}px`;
     tourSpotlight.style.height = `${Math.round(targetRect.height)}px`;
+    tourSpotlight.style.borderRadius = customRadius;
+
+    const tourSpotlightPulse = tourSpotlight.querySelector(".tour-spotlight-pulse");
+    if (tourSpotlightPulse) {
+        tourSpotlightPulse.style.borderRadius = isRoundTarget ? "50%" : customRadius;
+    }
 
     const cardW = Math.min(380, winW * 0.92);
     const cardH = tourCard.offsetHeight || 185;
 
-    let cardLeft = targetRect.left + (targetRect.width / 2) - (cardW / 2);
-    cardLeft = Math.max(14, Math.min(winW - cardW - 14, cardLeft));
-
+    let cardLeft;
     let cardTop;
     const hubCard = document.querySelector(".control-hub-card");
-
-    if (step.target === "#catSquad") {
-        // Đặt thẻ cao hơn hẳn đàn mèo
-        cardTop = Math.max(20, targetRect.top - cardH - 65);
-        cardLeft = Math.max(14, Math.min(winW - cardW - 20, targetRect.right - cardW));
-    } else if (step.openHub && hubCard) {
-        const hubRect = hubCard.getBoundingClientRect();
-
-        // Vị trí tối ưu khi mở menu: Đặt ra ngoài modal để không bao giờ che nút
-        if (winH - hubRect.bottom >= cardH + 12) {
-            // Đặt ngay bên dưới khung menu
-            cardTop = hubRect.bottom + 10;
-            cardLeft = (winW - cardW) / 2;
-        } else if (hubRect.top >= cardH + 12) {
-            // Đặt ngay bên trên khung menu
-            cardTop = hubRect.top - cardH - 10;
-            cardLeft = (winW - cardW) / 2;
-        } else if (hubRect.left >= cardW + 16) {
-            // Đặt bên trái khung menu
-            cardLeft = hubRect.left - cardW - 12;
-            cardTop = Math.max(16, Math.min(winH - cardH - 16, targetRect.top - 20));
-        } else if (winW - hubRect.right >= cardW + 16) {
-            // Đặt bên phải khung menu
-            cardLeft = hubRect.right + 12;
-            cardTop = Math.max(16, Math.min(winH - cardH - 16, targetRect.top - 20));
-        } else {
-            // Màn hình nhỏ: tránh đè lên nút đang highlight
-            if (targetRect.top > winH / 2) {
-                cardTop = Math.max(12, hubRect.top + 8);
-            } else {
-                cardTop = Math.min(winH - cardH - 12, hubRect.bottom - cardH - 8);
-            }
-            if (targetRect.left < winW / 2) {
-                cardLeft = Math.min(winW - cardW - 12, targetRect.right + 12);
-            } else {
-                cardLeft = Math.max(12, targetRect.left - cardW - 12);
-            }
-        }
-    } else if (step.placement === "top" || targetRect.bottom + cardH + 40 > winH) {
-        cardTop = Math.max(16, targetRect.top - cardH - 30);
-    } else {
-        cardTop = Math.min(winH - cardH - 16, targetRect.bottom + 24);
-    }
+    const isHubOpen = controlHubModal && controlHubModal.classList.contains("open");
 
     const bottomNav = document.getElementById("mobileBottomBar");
     const isBottomNavVisible = bottomNav && window.getComputedStyle(bottomNav).display !== "none";
-    const maxSafeBottom = isBottomNavVisible ? (winH - cardH - 74) : (winH - cardH - 16);
-    cardTop = Math.max(16, Math.min(maxSafeBottom, cardTop));
+    const maxSafeBottom = isBottomNavVisible ? (winH - cardH - 74) : (winH - cardH - 14);
 
-    tourCard.style.left = `${Math.round(cardLeft)}px`;
-    tourCard.style.top = `${Math.round(cardTop)}px`;
+    if (winW <= 768) {
+        // Màn hình Mobile: Căn giữa card theo chiều ngang
+        cardLeft = Math.max(10, Math.min(winW - cardW - 10, (winW - cardW) / 2));
+
+        if (step.target === "#catSquad" || step.target === "#gooseSquad") {
+            // Đàn mèo / ngỗng ở dưới đáy màn hình -> Đặt card phía trên
+            cardTop = Math.max(20, targetRect.top - cardH - 24);
+        } else if (step.openHub && isHubOpen) {
+            // Khi mở menu điều khiển trên mobile:
+            // Luôn đặt card ở đáy màn hình để lộ hoàn toàn phần tử được highlight ở phía trên
+            cardTop = maxSafeBottom;
+        } else if (step.target === "#heartMenuToggleBtn" || step.target === "#loveDaysWidget") {
+            // Nút ở đỉnh màn hình -> Card đặt bên dưới
+            cardTop = targetRect.bottom + 14;
+        } else if (step.placement === "top" || targetRect.bottom + cardH + 30 > winH) {
+            cardTop = Math.max(16, targetRect.top - cardH - 20);
+        } else {
+            cardTop = Math.min(maxSafeBottom, targetRect.bottom + 14);
+        }
+    } else {
+        // Màn hình Desktop
+        cardLeft = targetRect.left + (targetRect.width / 2) - (cardW / 2);
+        cardLeft = Math.max(16, Math.min(winW - cardW - 16, cardLeft));
+
+        if (step.target === "#catSquad") {
+            cardTop = Math.max(20, targetRect.top - cardH - 30);
+            cardLeft = Math.max(16, winW - cardW - 20);
+        } else if (step.target === "#gooseSquad") {
+            cardTop = Math.max(20, targetRect.top - cardH - 30);
+            cardLeft = 20;
+        } else if (step.target === "#heartMenuToggleBtn") {
+            cardTop = targetRect.bottom + 14;
+            cardLeft = Math.max(16, winW - cardW - 20);
+        } else if (step.target === "#loveDaysWidget") {
+            cardTop = targetRect.bottom + 14;
+            cardLeft = 20;
+        } else if (step.openHub && isHubOpen && hubCard) {
+            const hubRect = hubCard.getBoundingClientRect();
+            if (winW - hubRect.right >= cardW + 24) {
+                cardLeft = hubRect.right + 16;
+                cardTop = Math.max(20, Math.min(winH - cardH - 20, targetRect.top - 10));
+            } else if (hubRect.left >= cardW + 24) {
+                cardLeft = hubRect.left - cardW - 16;
+                cardTop = Math.max(20, Math.min(winH - cardH - 20, targetRect.top - 10));
+            } else {
+                cardTop = maxSafeBottom;
+                cardLeft = (winW - cardW) / 2;
+            }
+        } else if (step.placement === "top" || targetRect.bottom + cardH + 40 > winH) {
+            cardTop = Math.max(16, targetRect.top - cardH - 25);
+        } else {
+            cardTop = Math.min(maxSafeBottom, targetRect.bottom + 18);
+        }
+    }
+
+    cardTop = Math.max(14, Math.min(maxSafeBottom, cardTop));
+
+    if (hasUserMovedTourCard && userCustomCardLeft !== null && userCustomCardTop !== null) {
+        const winW = window.innerWidth;
+        const winH = window.innerHeight;
+        const cardW = tourCard.offsetWidth || 360;
+        const cardH = tourCard.offsetHeight || 185;
+        const safeLeft = Math.max(6, Math.min(winW - cardW - 6, userCustomCardLeft));
+        const safeTop = Math.max(6, Math.min(winH - cardH - 6, userCustomCardTop));
+        tourCard.style.left = `${Math.round(safeLeft)}px`;
+        tourCard.style.top = `${Math.round(safeTop)}px`;
+    } else {
+        tourCard.style.left = `${Math.round(cardLeft)}px`;
+        tourCard.style.top = `${Math.round(cardTop)}px`;
+    }
 
     // Cập nhật vị trí Pointer bàn tay 👆
     if (tourPointer) {
-        if (cardTop < targetRect.top) {
-            // Thẻ ở phía trên nút -> bàn tay ở giữa chỉ xuống
-            tourPointer.style.left = `${Math.round(targetRect.left + targetRect.width / 2 - 16)}px`;
-            tourPointer.style.top = `${Math.round(targetRect.top - 46)}px`;
+        const pointerX = Math.max(16, Math.min(winW - 48, targetRect.left + (targetRect.width / 2) - 16));
+        tourPointer.style.left = `${Math.round(pointerX)}px`;
+
+        const effectiveCardTop = (hasUserMovedTourCard && userCustomCardTop !== null) ? userCustomCardTop : cardTop;
+        if (effectiveCardTop < targetRect.top) {
+            // Thẻ ở phía trên nút -> Bàn tay ở trên chỉ xuống phần tử
+            tourPointer.style.top = `${Math.round(targetRect.top - 40)}px`;
             tourPointer.style.transform = "rotate(180deg)";
         } else {
-            // Thẻ ở phía dưới nút -> bàn tay ở giữa chỉ lên
-            tourPointer.style.left = `${Math.round(targetRect.left + targetRect.width / 2 - 16)}px`;
-            tourPointer.style.top = `${Math.round(targetRect.bottom + 8)}px`;
+            // Thẻ ở phía dưới nút -> Bàn tay ở dưới chỉ lên phần tử
+            tourPointer.style.top = `${Math.round(targetRect.bottom + 6)}px`;
             tourPointer.style.transform = "rotate(0deg)";
         }
     }
 }
 
-// Theo dõi bám sát vị trí theo từng khung hình để không bị lệch khi modal đang chuyển động
-function syncTourTracking(duration = 500) {
+// Tự động cuộn mượt mà đến đúng vị trí phần tử được highlight mà không bị lệch
+function scrollToTourElement(el) {
+    if (!el) return;
+    try {
+        let targetEl = el;
+        if (el.id === "shapeToggle" || el.id === "themeToggle" || el.id === "bgModeToggle" || el.id === "musicGenreToggle") {
+            targetEl = el.closest(".hub-item-group") || el;
+        }
+
+        const scrollParent = targetEl.closest(".control-hub-card, .music-card, .letter-card, .name-editor-card, .author-card");
+        if (scrollParent) {
+            const winW = window.innerWidth;
+            const winH = window.innerHeight;
+            const cardH = tourCard ? (tourCard.offsetHeight || 185) : 185;
+
+            let visibleTargetY;
+            if (winW <= 768) {
+                const availableH = Math.max(140, winH - cardH - 50);
+                visibleTargetY = availableH * 0.35;
+            } else {
+                visibleTargetY = Math.max(80, scrollParent.clientHeight * 0.3);
+            }
+
+            const currentRelativeTop = targetEl.getBoundingClientRect().top - scrollParent.getBoundingClientRect().top;
+            const targetScrollTop = Math.max(0, scrollParent.scrollTop + currentRelativeTop - visibleTargetY);
+
+            scrollParent.scrollTo({
+                top: targetScrollTop,
+                behavior: "smooth"
+            });
+        } else {
+            window.scrollTo({ left: 0, top: 0, behavior: "instant" });
+            if (document.documentElement.scrollLeft !== 0) document.documentElement.scrollLeft = 0;
+            if (document.body.scrollLeft !== 0) document.body.scrollLeft = 0;
+        }
+    } catch (err) {
+        // fallback
+    }
+}
+
+// Theo dõi bám sát vị trí theo từng khung hình liên tục để khung dạ quang bám dính tuyệt đối
+function syncTourTracking(duration = 850) {
     const startTime = performance.now();
     function trackFrame(now) {
         if (!isTourActive) return;
@@ -3361,6 +5373,16 @@ function goToTourStep(stepIdx) {
     if (stepIdx < 0 || stepIdx >= TOUR_STEPS.length) return;
     currentTourStep = stepIdx;
     const step = TOUR_STEPS[currentTourStep];
+
+    // Reset vị trí kéo tùy chỉnh khi đổi bước mới
+    hasUserMovedTourCard = false;
+    userCustomCardLeft = null;
+    userCustomCardTop = null;
+
+    // Khóa scroll horizontal window
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" });
+    if (document.documentElement.scrollLeft !== 0) document.documentElement.scrollLeft = 0;
+    if (document.body.scrollLeft !== 0) document.body.scrollLeft = 0;
 
     if (step.openHub) {
         openControlHub();
@@ -3385,7 +5407,16 @@ function goToTourStep(stepIdx) {
     }
 
     renderTourDots();
-    syncTourTracking(500);
+    updateTourPosition();
+
+    // Tự động cuộn mượt mà đến đúng vị trí phần tử được highlight
+    const el = document.querySelector(step.target);
+    if (el) {
+        scrollToTourElement(el);
+    }
+
+    // Đồng bộ bám sát vị trí liên tục trong 850ms để khung dạ quang không bao giờ bị lệch khi đang mở modal/cuộn
+    syncTourTracking(850);
 
     // Tự động phát âm thanh giọng nói tiếng Việt vui tươi
     speakTourVoice(step);
@@ -3393,6 +5424,7 @@ function goToTourStep(stepIdx) {
 
 function closeTour(startMusicAfter = true) {
     isTourActive = false;
+    document.body.classList.remove("tour-active");
     clearTimeout(tourVoiceTimer);
     if (tourVoiceAudio) {
         tourVoiceAudio.pause();
@@ -3410,6 +5442,8 @@ function closeTour(startMusicAfter = true) {
 
 function startTour() {
     isTourActive = true;
+    document.body.classList.add("tour-active");
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" });
     if (tourOverlay) tourOverlay.classList.add("active");
     goToTourStep(0);
 }
@@ -3418,6 +5452,7 @@ let isStepChanging = false;
 
 function handleTourNext(e) {
     if (e) {
+        e.preventDefault();
         e.stopPropagation();
     }
     if (isStepChanging) return;
@@ -3434,6 +5469,7 @@ function handleTourNext(e) {
 
 function handleTourPrev(e) {
     if (e) {
+        e.preventDefault();
         e.stopPropagation();
     }
     if (isStepChanging) return;
@@ -3446,7 +5482,10 @@ function handleTourPrev(e) {
 }
 
 function handleTourClose(e) {
-    if (e) e.stopPropagation();
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
     closeTour(true);
 }
 
@@ -3457,10 +5496,106 @@ if (tourSkipBtn) tourSkipBtn.addEventListener("click", handleTourClose);
 if (tourGuideBtn) tourGuideBtn.addEventListener("click", (e) => { if (e) e.stopPropagation(); startTour(); });
 if (topTourGuideBtn) topTourGuideBtn.addEventListener("click", (e) => { if (e) e.stopPropagation(); startTour(); });
 
+let isDraggingTourCard = false;
+let tourDragStartX = 0;
+let tourDragStartY = 0;
+let tourCardInitialLeft = 0;
+let tourCardInitialTop = 0;
+let hasUserMovedTourCard = false;
+let userCustomCardLeft = null;
+let userCustomCardTop = null;
+let tourDragMoved = false;
+
+function initTourCardDraggable() {
+    if (!tourCard) return;
+
+    function startDrag(clientX, clientY) {
+        isDraggingTourCard = true;
+        tourDragMoved = false;
+        tourDragStartX = clientX;
+        tourDragStartY = clientY;
+        const rect = tourCard.getBoundingClientRect();
+        tourCardInitialLeft = rect.left;
+        tourCardInitialTop = rect.top;
+        tourCard.classList.add("dragging");
+    }
+
+    function moveDrag(clientX, clientY) {
+        if (!isDraggingTourCard) return;
+        const dx = clientX - tourDragStartX;
+        const dy = clientY - tourDragStartY;
+        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+            tourDragMoved = true;
+        }
+        const winW = window.innerWidth;
+        const winH = window.innerHeight;
+        const cardW = tourCard.offsetWidth || 360;
+        const cardH = tourCard.offsetHeight || 185;
+
+        let newLeft = tourCardInitialLeft + dx;
+        let newTop = tourCardInitialTop + dy;
+
+        newLeft = Math.max(6, Math.min(winW - cardW - 6, newLeft));
+        newTop = Math.max(6, Math.min(winH - cardH - 6, newTop));
+
+        tourCard.style.left = `${Math.round(newLeft)}px`;
+        tourCard.style.top = `${Math.round(newTop)}px`;
+
+        hasUserMovedTourCard = true;
+        userCustomCardLeft = newLeft;
+        userCustomCardTop = newTop;
+    }
+
+    function endDrag() {
+        if (!isDraggingTourCard) return;
+        isDraggingTourCard = false;
+        tourCard.classList.remove("dragging");
+    }
+
+    tourCard.addEventListener("mousedown", (e) => {
+        if (e.target.closest("button") || e.target.closest(".tour-dot")) return;
+        e.preventDefault();
+        startDrag(e.clientX, e.clientY);
+    });
+
+    window.addEventListener("mousemove", (e) => {
+        if (isDraggingTourCard) {
+            e.preventDefault();
+            moveDrag(e.clientX, e.clientY);
+        }
+    });
+
+    window.addEventListener("mouseup", () => {
+        endDrag();
+    });
+
+    tourCard.addEventListener("touchstart", (e) => {
+        if (e.target.closest("button") || e.target.closest(".tour-dot")) return;
+        if (e.touches.length === 1) {
+            startDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: true });
+
+    window.addEventListener("touchmove", (e) => {
+        if (isDraggingTourCard && e.touches.length === 1) {
+            moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: true });
+
+    window.addEventListener("touchend", () => {
+        endDrag();
+    });
+}
+initTourCardDraggable();
+
 if (tourCard) {
     tourCard.addEventListener("click", (e) => {
-        // Nếu không bấm vào nút đóng/bỏ qua/tiếp tục thì đọc lại lời thoại
-        if (!e.target.closest("button")) {
+        if (tourDragMoved) {
+            tourDragMoved = false;
+            return;
+        }
+        // Nếu không bấm vào nút đóng/bỏ qua/tiếp tục/kéo thì đọc lại lời thoại
+        if (!e.target.closest("button") && !e.target.closest(".tour-dot") && !e.target.closest(".tour-drag-handle")) {
             const step = TOUR_STEPS[currentTourStep];
             if (step) speakTourVoice(step);
         }
@@ -3469,6 +5604,16 @@ if (tourCard) {
 
 window.addEventListener("resize", () => {
     if (isTourActive) updateTourPosition();
+});
+
+window.addEventListener("scroll", () => {
+    if (isTourActive) updateTourPosition();
+}, { passive: true });
+
+document.querySelectorAll(".control-hub-card, .music-card, .letter-card, .name-editor-card, .author-card, .hub-chips-row").forEach(container => {
+    container.addEventListener("scroll", () => {
+        if (isTourActive) updateTourPosition();
+    }, { passive: true });
 });
 
 // Tự động khởi chạy tour hướng dẫn ngay khi mở trang

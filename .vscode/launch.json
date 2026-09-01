@@ -5,10 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         
+        
         {
-            "type": "chrome",
+            "type": "microsoft edge",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
+            "name": "Launch Microsoft Edge against localhost",
             "url": "http://localhost:8080",
             "webRoot": "${workspaceFolder}"
         }
