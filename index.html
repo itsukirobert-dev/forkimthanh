@@ -40,15 +40,16 @@
                         <span class="btn-text">Pháo Hoa</span>
                     </button>
 
-                    <!-- Main Floating Hub Trigger Button -->
-                    <button id="hubToggleBtn" class="glass-btn hub-btn" title="Mở Hộp Tiện Ích & Điều Khiển">
-                        <span class="hub-icon-glow">✨</span>
-                        <span class="btn-text">Menu Điều Khiển</span>
+                    <!-- Master Pink Heart Floating Hub Trigger Button (Trái Tim Màu Hồng Chứa Full Chức Năng & Thuộc Tính) -->
+                    <button id="hubToggleBtn" class="glass-btn hub-btn master-pink-heart-btn"
+                        title="Trái Tim Tiện Ích - Full Tính Năng & Thuộc Tính 💖">
+                        <span class="pink-heart-master-icon">💖</span>
+                        <span class="btn-text">Full Tính Năng</span>
                         <span class="hub-badge-dot"></span>
                     </button>
 
                     <!-- Direct Tour Guide Button on Top Bar -->
-                    <button id="topTourGuideBtn" class="glass-btn tour-guide-btn" title="Xem hướng dẫn sử dụng 14 bước">
+                    <button id="topTourGuideBtn" class="glass-btn tour-guide-btn" title="Xem hướng dẫn sử dụng 15 bước">
                         <span class="btn-icon">🧭</span>
                         <span class="btn-text">Hướng Dẫn</span>
                     </button>
@@ -70,167 +71,263 @@
                     </button>
                 </div>
 
-                <!-- Floating Glass Control Hub Modal (Hộp Tiện Ích Đa Năng Tinh Gọn) -->
+                <!-- Floating Glass Master Pink Heart Control Hub Modal (Hộp Tiện Ích Trái Tim Hồng Full Chức Năng & Thuộc Tính) -->
                 <div id="controlHubModal" class="control-hub-modal">
                     <div class="control-hub-backdrop" id="hubBackdrop"></div>
                     <div class="control-hub-card">
                         <div class="hub-header">
                             <div class="hub-title">
-                                <span class="hub-header-icon">⚙️</span>
-                                <h3>Trung Tâm Tiện Ích</h3>
+                                <span class="hub-header-icon pink-heart-pulse">💖</span>
+                                <div>
+                                    <h3>Trung Tâm Tiện Ích Trái Tim Hồng</h3>
+                                    <span class="hub-title-badge">Full Chức Năng &amp; Thuộc Tính</span>
+                                </div>
                             </div>
                             <button id="closeHubBtn" class="close-hub-btn" aria-label="Đóng Menu">&times;</button>
                         </div>
 
-                        <p class="hub-subtitle">Tùy chỉnh không gian vũ trụ tình yêu & âm nhạc 💖</p>
+                        <p class="hub-subtitle">Tùy chỉnh trọn vẹn vũ trụ tình yêu, hiệu ứng &amp; âm nhạc dành riêng
+                            cho bạn 💕</p>
 
-                        <div class="hub-grid">
-                            <!-- 1. Kiểu Dáng Tim -->
-                            <div class="hub-item-group">
-                                <button id="shapeToggle" class="hub-item-btn shape-btn"
-                                    title="Bấm đổi kiểu dáng tiếp theo">
-                                    <div class="hub-item-icon" id="shapeIcon">🌌</div>
-                                    <div class="hub-item-info">
-                                        <span class="hub-item-title">Kiểu Dáng Tim</span>
-                                        <span class="hub-item-desc" id="shapeName">Thiên Hà</span>
+                        <!-- Navigation Tabs -->
+                        <div class="hub-nav-tabs" id="hubNavTabs">
+                            <button class="hub-tab-btn active" data-tab="tab-theme">
+                                <span class="tab-icon">💖</span>
+                                <span class="tab-text">Kiểu &amp; Màu</span>
+                            </button>
+                            <button class="hub-tab-btn" data-tab="tab-space">
+                                <span class="tab-icon">🖼️</span>
+                                <span class="tab-text">Nền &amp; Tùy Biến</span>
+                            </button>
+                            <button class="hub-tab-btn" data-tab="tab-music">
+                                <span class="tab-icon">🎵</span>
+                                <span class="tab-text">Âm Nhạc</span>
+                            </button>
+                            <button class="hub-tab-btn" data-tab="tab-effects">
+                                <span class="tab-icon">🎆</span>
+                                <span class="tab-text">Hiệu Ứng</span>
+                            </button>
+                            <button class="hub-tab-btn" data-tab="tab-love">
+                                <span class="tab-icon">✍️</span>
+                                <span class="tab-text">Kỷ Niệm &amp; Khác</span>
+                            </button>
+                        </div>
+
+                        <!-- Tab 1: Kiểu Dáng & Sắc Màu -->
+                        <div class="hub-tab-panel active" id="tab-theme">
+                            <div class="hub-grid">
+                                <!-- 1. Kiểu Dáng Tim -->
+                                <div class="hub-item-group">
+                                    <button id="shapeToggle" class="hub-item-btn shape-btn"
+                                        title="Bấm đổi kiểu dáng tiếp theo">
+                                        <div class="hub-item-icon" id="shapeIcon">🌌</div>
+                                        <div class="hub-item-info">
+                                            <span class="hub-item-title">5 Kiểu Dáng Tim Nghệ Thuật</span>
+                                            <span class="hub-item-desc" id="shapeName">Thiên Hà 3D</span>
+                                        </div>
+                                    </button>
+                                    <div class="hub-chips-row" id="shapeChips">
+                                        <button class="hub-chip active" data-shape="galaxy">🌌 Thiên Hà 3D</button>
+                                        <button class="hub-chip" data-shape="rose">🌸 Hoa Hồng</button>
+                                        <button class="hub-chip" data-shape="orb">🔮 Quả Cầu</button>
+                                        <button class="hub-chip" data-shape="infinity">♾️ Vô Cực</button>
+                                        <button class="hub-chip" data-shape="glass">💎 Pha Lê</button>
                                     </div>
-                                </button>
-                                <div class="hub-chips-row" id="shapeChips">
-                                    <button class="hub-chip active" data-shape="galaxy">🌌 Thiên Hà</button>
-                                    <button class="hub-chip" data-shape="flower">🌸 Hoa Hồng</button>
-                                    <button class="hub-chip" data-shape="sphere">🔮 Quả Cầu</button>
-                                    <button class="hub-chip" data-shape="ribbon">♾️ Vô Cực</button>
-                                    <button class="hub-chip" data-shape="crystal">💎 Pha Lê</button>
+                                </div>
+
+                                <!-- 2. 10 Sắc Màu -->
+                                <div class="hub-item-group">
+                                    <button id="themeToggle" class="hub-item-btn theme-btn"
+                                        title="Bấm đổi màu sắc tiếp theo">
+                                        <div class="hub-item-icon" id="themeIcon">💖</div>
+                                        <div class="hub-item-info">
+                                            <span class="hub-item-title">10 Sắc Màu Dạ Quang &amp; Lời Thính</span>
+                                            <span class="hub-item-desc" id="themeName">Hồng Ngọt Ngào</span>
+                                        </div>
+                                    </button>
+                                    <div class="hub-chips-row" id="themeChips">
+                                        <button class="hub-chip active" data-theme="pink">💖 Hồng</button>
+                                        <button class="hub-chip" data-theme="galaxy">🌌 Vũ Trụ</button>
+                                        <button class="hub-chip" data-theme="gold">👑 Hoàng Gia</button>
+                                        <button class="hub-chip" data-theme="aurora">❄️ Băng Tuyết</button>
+                                        <button class="hub-chip" data-theme="emerald">💚 Ngọc Lục</button>
+                                        <button class="hub-chip" data-theme="sunset">🧡 Hoàng Hôn</button>
+                                        <button class="hub-chip" data-theme="sakura">🌸 Sakura</button>
+                                        <button class="hub-chip" data-theme="ocean">🌊 Đại Dương</button>
+                                        <button class="hub-chip" data-theme="diamond">💎 Bạch Kim</button>
+                                        <button class="hub-chip" data-theme="rainbow">🌈 Cầu Vồng</button>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- 2. 10 Sắc Màu -->
-                            <div class="hub-item-group">
-                                <button id="themeToggle" class="hub-item-btn theme-btn"
-                                    title="Bấm đổi màu sắc tiếp theo">
-                                    <div class="hub-item-icon" id="themeIcon">💖</div>
-                                    <div class="hub-item-info">
-                                        <span class="hub-item-title">10 Sắc Màu</span>
-                                        <span class="hub-item-desc" id="themeName">Hồng Dạ Quang</span>
+                        <!-- Tab 2: Không Gian Nền & Thuộc Tính Tùy Biến -->
+                        <div class="hub-tab-panel" id="tab-space">
+                            <div class="hub-grid">
+                                <!-- Không Gian Nền -->
+                                <div class="hub-item-group">
+                                    <button id="bgModeToggle" class="hub-item-btn bg-mode-btn"
+                                        title="Bấm đổi nền tiếp theo">
+                                        <div class="hub-item-icon" id="bgModeIcon">🖼️</div>
+                                        <div class="hub-item-info">
+                                            <span class="hub-item-title">4 Không Gian Hình Nền</span>
+                                            <span class="hub-item-desc" id="bgModeName">Nền: Chuẩn</span>
+                                        </div>
+                                    </button>
+                                    <div class="hub-chips-row" id="bgChips">
+                                        <button class="hub-chip active" data-bg="default">🖼️ Nền Chuẩn</button>
+                                        <button class="hub-chip" data-bg="art">🌸 Hoa Anh Đào</button>
+                                        <button class="hub-chip" data-bg="galaxy_bg">🌌 Thiên Hà 3D</button>
+                                        <button class="hub-chip" data-bg="pure">🌄 Thuần Khiết</button>
                                     </div>
-                                </button>
-                                <div class="hub-chips-row" id="themeChips">
-                                    <button class="hub-chip active" data-theme="pink">💖 Hồng</button>
-                                    <button class="hub-chip" data-theme="galaxy">🌌 Vũ Trụ</button>
-                                    <button class="hub-chip" data-theme="gold">👑 Hoàng Gia</button>
-                                    <button class="hub-chip" data-theme="aurora">❄️ Băng Tuyết</button>
-                                    <button class="hub-chip" data-theme="emerald">💚 Ngọc Lục</button>
-                                    <button class="hub-chip" data-theme="sunset">🧡 Hoàng Hôn</button>
-                                    <button class="hub-chip" data-theme="sakura">🌸 Sakura</button>
-                                    <button class="hub-chip" data-theme="ocean">🌊 Đại Dương</button>
-                                    <button class="hub-chip" data-theme="diamond">💎 Kim Cương</button>
-                                    <button class="hub-chip" data-theme="rainbow">🌈 Cầu Vồng</button>
+                                </div>
+
+                                <!-- Thuộc Tính Nâng Cao (Sliders & Controls) -->
+                                <div class="hub-sliders-box">
+                                    <div class="slider-row">
+                                        <div class="slider-header">
+                                            <span>🔍 Kích Thước Trái Tim:</span>
+                                            <span id="scaleValueText">100%</span>
+                                        </div>
+                                        <input type="range" id="heartScaleSlider" min="50" max="220" value="100"
+                                            class="hub-slider">
+                                    </div>
+                                    <div class="slider-row">
+                                        <div class="slider-header">
+                                            <span>💓 Tốc Độ Đập Nhịp Tim:</span>
+                                            <span id="beatSpeedValueText">Chuẩn</span>
+                                        </div>
+                                        <input type="range" id="beatSpeedSlider" min="50" max="200" value="100"
+                                            class="hub-slider">
+                                    </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- 3. Không Gian Nền -->
-                            <div class="hub-item-group">
-                                <button id="bgModeToggle" class="hub-item-btn bg-mode-btn"
-                                    title="Bấm đổi nền tiếp theo">
-                                    <div class="hub-item-icon" id="bgModeIcon">🖼️</div>
-                                    <div class="hub-item-info">
-                                        <span class="hub-item-title">Không Gian Nền</span>
-                                        <span class="hub-item-desc" id="bgModeName">Nền: Chuẩn</span>
+                        <!-- Tab 3: Âm Nhạc & Ca Sĩ -->
+                        <div class="hub-tab-panel" id="tab-music">
+                            <div class="hub-grid">
+                                <!-- Đổi Ca Sĩ -->
+                                <div class="hub-item-group">
+                                    <button id="musicGenreToggle" class="hub-item-btn music-genre-btn"
+                                        title="Bấm đổi ca sĩ">
+                                        <div class="hub-item-icon" id="genreIcon">🎸</div>
+                                        <div class="hub-item-info">
+                                            <span class="hub-item-title">Dòng Nhạc Thần Tượng</span>
+                                            <span class="hub-item-desc" id="genreName">Dòng nhạc Vũ.</span>
+                                        </div>
+                                    </button>
+                                    <div class="hub-chips-row" id="genreChips">
+                                        <button class="hub-chip active" data-genre="vu">🎸 Vũ. Acoustic</button>
+                                        <button class="hub-chip" data-genre="mtp">🔥 Sơn Tùng M-TP</button>
                                     </div>
-                                </button>
-                                <div class="hub-chips-row" id="bgChips">
-                                    <button class="hub-chip active" data-bg="default">🖼️ Nền Chuẩn</button>
-                                    <button class="hub-chip" data-bg="art">🌸 Hoa Anh Đào</button>
-                                    <button class="hub-chip" data-bg="galaxy_bg">🌌 Thiên Hà 3D</button>
-                                    <button class="hub-chip" data-bg="pure">🌄 Thuần Khiết</button>
+                                </div>
+
+                                <!-- Các Tiện Ích Nhạc Nhanh -->
+                                <div class="hub-quick-actions-row">
+                                    <button id="hubRandomSongBtn" class="hub-action-chip"
+                                        title="Phát bài hát ngẫu nhiên">
+                                        <span>🎲</span> Đổi Bài Ngẫu Nhiên
+                                    </button>
+                                    <button id="openPlaylistBtn" class="hub-action-chip"
+                                        title="Mở danh sách bài hát chi tiết">
+                                        <span>🎵</span> Kho Nhạc Đầy Đủ
+                                    </button>
+                                    <button id="hubUploadMusicBtn" class="hub-action-chip"
+                                        title="Tải file MP3 từ máy của bạn">
+                                        <span>📁</span> Tải MP3 Riêng
+                                    </button>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- 4. Đổi Ca Sĩ -->
-                            <div class="hub-item-group">
-                                <button id="musicGenreToggle" class="hub-item-btn music-genre-btn"
-                                    title="Bấm đổi ca sĩ">
-                                    <div class="hub-item-icon" id="genreIcon">🎸</div>
-                                    <div class="hub-item-info">
-                                        <span class="hub-item-title">Đổi Ca Sĩ</span>
-                                        <span class="hub-item-desc" id="genreName">Dòng nhạc Vũ.</span>
-                                    </div>
-                                </button>
-                                <div class="hub-chips-row" id="genreChips">
-                                    <button class="hub-chip active" data-genre="vu">🎸 Vũ. Acoustic</button>
-                                    <button class="hub-chip" data-genre="mtp">🔥 Sơn Tùng M-TP</button>
+                        <!-- Tab 4: Hiệu Ứng & Pháo Hoa -->
+                        <div class="hub-tab-panel" id="tab-effects">
+                            <div class="hub-grid">
+                                <div class="hub-item-group single">
+                                    <button id="hubFireworksBtn" class="hub-item-btn fireworks-item-btn"
+                                        title="Bắn pháo hoa trái tim bùng nổ">
+                                        <div class="hub-item-icon">🎆</div>
+                                        <div class="hub-item-info">
+                                            <span class="hub-item-title">Bắn Pháo Hoa Trái Tim</span>
+                                            <span class="hub-item-desc">Bùng nổ pháo hoa đa sắc rực rỡ</span>
+                                        </div>
+                                    </button>
+                                </div>
+                                <div class="hub-item-group single">
+                                    <button id="hubBurstHeartbeatBtn" class="hub-item-btn heartbeat-item-btn"
+                                        title="Kích hoạt nhịp tim đập bùng nổ">
+                                        <div class="hub-item-icon">💓</div>
+                                        <div class="hub-item-info">
+                                            <span class="hub-item-title">Kích Hoạt Nhịp Đập Bùng Nổ</span>
+                                            <span class="hub-item-desc">Phóng thích sóng xung kích &amp; ngàn hạt
+                                                tim</span>
+                                        </div>
+                                    </button>
+                                </div>
+                                <div class="hub-item-group single">
+                                    <button id="hubShootingStarBtn" class="hub-item-btn star-item-btn"
+                                        title="Ước nguyện với mưa sao băng">
+                                        <div class="hub-item-icon">💫</div>
+                                        <div class="hub-item-info">
+                                            <span class="hub-item-title">Mưa Sao Băng Rơi Lướt</span>
+                                            <span class="hub-item-desc">Vệt sao băng may mắn trên bầu trời đêm</span>
+                                        </div>
+                                    </button>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- 5. Bắn Pháo Hoa Trái Tim -->
-                            <div class="hub-item-group single">
-                                <button id="hubFireworksBtn" class="hub-item-btn fireworks-item-btn"
-                                    title="Bắn pháo hoa trái tim bùng nổ">
-                                    <div class="hub-item-icon">🎆</div>
-                                    <div class="hub-item-info">
-                                        <span class="hub-item-title">Pháo Hoa Trái Tim</span>
-                                        <span class="hub-item-desc">Bùng nổ pháo hoa đa sắc</span>
-                                    </div>
-                                </button>
-                            </div>
+                        <!-- Tab 5: Kỷ Niệm & Thú Cưng -->
+                        <div class="hub-tab-panel" id="tab-love">
+                            <div class="hub-grid">
+                                <!-- Đổi Tên & Ngày Kỷ Niệm -->
+                                <div class="hub-item-group single">
+                                    <button id="nameEditorBtn" class="hub-item-btn name-editor-btn"
+                                        title="Tùy chỉnh tên người nhận & ngày yêu">
+                                        <div class="hub-item-icon">✍️</div>
+                                        <div class="hub-item-info">
+                                            <span class="hub-item-title">Tùy Chỉnh Tên &amp; Ngày Kỷ Niệm</span>
+                                            <span class="hub-item-desc">Đổi tên &amp; ngày bắt đầu yêu nhau</span>
+                                        </div>
+                                    </button>
+                                </div>
 
-                            <!-- 6. Đổi Tên & Ngày Kỷ Niệm -->
-                            <div class="hub-item-group single">
-                                <button id="nameEditorBtn" class="hub-item-btn name-editor-btn"
-                                    title="Tùy chỉnh tên người nhận & ngày yêu">
-                                    <div class="hub-item-icon">✍️</div>
-                                    <div class="hub-item-info">
-                                        <span class="hub-item-title">Tùy Chỉnh Tên & Kỷ Niệm</span>
-                                        <span class="hub-item-desc">Đổi tên & ngày yêu nhau</span>
-                                    </div>
-                                </button>
-                            </div>
+                                <!-- Thư Tình Bí Mật -->
+                                <div class="hub-item-group single">
+                                    <button id="letterBtn" class="hub-item-btn letter-btn"
+                                        title="Mở bức thư tình bí mật">
+                                        <div class="hub-item-icon">💌</div>
+                                        <div class="hub-item-info">
+                                            <span class="hub-item-title">Thư Tình Bí Mật</span>
+                                            <span class="hub-item-desc">Hiệu ứng gõ chữ &amp; giọng kể lãng mạn</span>
+                                        </div>
+                                    </button>
+                                </div>
 
-                            <!-- 7. Kho Nhạc -->
-                            <div class="hub-item-group single">
-                                <button id="openPlaylistBtn" class="hub-item-btn playlist-btn"
-                                    title="Mở kho bài hát chi tiết">
-                                    <div class="hub-item-icon">🎵</div>
-                                    <div class="hub-item-info">
-                                        <span class="hub-item-title">Kho Nhạc</span>
-                                        <span class="hub-item-desc">Chọn bài hát & tải MP3</span>
-                                    </div>
-                                </button>
-                            </div>
+                                <!-- Tác Giả (Mai IT) -->
+                                <div class="hub-item-group single">
+                                    <button id="authorBtn" class="hub-item-btn author-btn"
+                                        title="Xem thông tin tác giả Mai IT">
+                                        <div class="hub-item-icon">👑</div>
+                                        <div class="hub-item-info">
+                                            <span class="hub-item-title">Tác Giả</span>
+                                            <span class="hub-item-desc">Mai IT • Developer &amp; Creator</span>
+                                        </div>
+                                    </button>
+                                </div>
 
-                            <!-- 8. Thư Tình Bí Mật -->
-                            <div class="hub-item-group single">
-                                <button id="letterBtn" class="hub-item-btn letter-btn" title="Mở bức thư tình bí mật">
-                                    <div class="hub-item-icon">💌</div>
-                                    <div class="hub-item-info">
-                                        <span class="hub-item-title">Thư Tình Bí Mật</span>
-                                        <span class="hub-item-desc">Lời chúc ấm áp</span>
-                                    </div>
-                                </button>
-                            </div>
-
-                            <!-- 9. Tác Giả (Mai IT) -->
-                            <div class="hub-item-group single">
-                                <button id="authorBtn" class="hub-item-btn author-btn"
-                                    title="Xem thông tin tác giả Mai IT">
-                                    <div class="hub-item-icon">👑</div>
-                                    <div class="hub-item-info">
-                                        <span class="hub-item-title">Tác Giả</span>
-                                        <span class="hub-item-desc">Mai IT • Developer</span>
-                                    </div>
-                                </button>
-                            </div>
-
-                            <!-- 10. Interactive Tour Guide -->
-                            <div class="hub-item-group single">
-                                <button id="tourGuideBtn" class="hub-item-btn tour-guide-btn"
-                                    title="Xem hướng dẫn sử dụng 15 bước">
-                                    <div class="hub-item-icon">🧭</div>
-                                    <div class="hub-item-info">
-                                        <span class="hub-item-title">Hướng Dẫn</span>
-                                        <span class="hub-item-desc">Tour 15 bước chi tiết</span>
-                                    </div>
-                                </button>
+                                <!-- Interactive Tour Guide -->
+                                <div class="hub-item-group single">
+                                    <button id="tourGuideBtn" class="hub-item-btn tour-guide-btn"
+                                        title="Xem hướng dẫn sử dụng 15 bước">
+                                        <div class="hub-item-icon">🧭</div>
+                                        <div class="hub-item-info">
+                                            <span class="hub-item-title">Hướng Dẫn Sử Dụng</span>
+                                            <span class="hub-item-desc">Tour 15 bước chi tiết</span>
+                                        </div>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -431,29 +528,6 @@
                             <div class="goose-foot goose-foot-left"></div>
                             <div class="goose-foot goose-foot-right"></div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Complete Step-by-Step Interactive Guided Tour Overlay (Chế Độ Hướng Dẫn Từng Bước Từ Đầu Đến Cuối) -->
-            <div id="tourOverlay" class="tour-overlay">
-                <div id="tourSpotlight" class="tour-spotlight">
-                    <div class="tour-spotlight-pulse"></div>
-                    <div class="tour-pointer" id="tourPointer">👆</div>
-                </div>
-                <div id="tourCard" class="tour-card">
-                    <button id="tourCloseBtn" class="tour-close-btn" title="Bỏ qua hướng dẫn">✕</button>
-                    <div class="tour-header">
-                        <span class="tour-step-badge" id="tourStepBadge">BƯỚC 1 / 7</span>
-                        <div class="tour-dots" id="tourDots"></div>
-                    </div>
-                    <h3 class="tour-title" id="tourTitle">💖 Khởi Động Trái Tim & Âm Nhạc</h3>
-                    <p class="tour-desc" id="tourDesc">Chạm vào trái tim hoặc bất kỳ đâu trên màn hình để cất tiếng hát
-                        ca sĩ và kích hoạt ánh sáng dạ quang 3D!</p>
-                    <div class="tour-actions">
-                        <button id="tourSkipBtn" class="tour-btn tour-btn-skip">Bỏ qua</button>
-                        <button id="tourPrevBtn" class="tour-btn tour-btn-prev">← Quay lại</button>
-                        <button id="tourNextBtn" class="tour-btn tour-btn-next">Tiếp tục →</button>
                     </div>
                 </div>
             </div>
@@ -665,6 +739,33 @@
                 </div>
             </div>
         </div>
+
+        <!-- Floating Mobile Bottom Navigation Dock (Thanh Điều Hướng Nổi Đáy Màn Hình Di Động) -->
+        <nav id="mobileBottomBar" class="mobile-bottom-bar" aria-label="Thanh điều hướng di động">
+            <button id="mobShapeBtn" class="mobile-nav-item" title="Đổi Kiểu Dáng Tim">
+                <span class="mob-nav-icon" id="mobShapeIcon">🌌</span>
+                <span class="mob-nav-label">Kiểu Dáng</span>
+            </button>
+            <button id="mobThemeBtn" class="mobile-nav-item" title="Đổi 10 Sắc Màu">
+                <span class="mob-nav-icon" id="mobThemeIcon">💖</span>
+                <span class="mob-nav-label">Màu Sắc</span>
+            </button>
+            <button id="mobHubBtn" class="mobile-nav-item mob-action-center" title="Trái Tim Hồng - Full Tính Năng 💖">
+                <div class="mob-center-glow"></div>
+                <div class="mob-center-inner">
+                    <span class="mob-center-icon">💖</span>
+                </div>
+                <span class="mob-nav-label">Tiện Ích</span>
+            </button>
+            <button id="mobFireworksBtn" class="mobile-nav-item" title="Bắn Pháo Hoa Trái Tim">
+                <span class="mob-nav-icon">🎆</span>
+                <span class="mob-nav-label">Pháo Hoa</span>
+            </button>
+            <button id="mobLetterBtn" class="mobile-nav-item" title="Mở Bức Thư Tình Bí Mật">
+                <span class="mob-nav-icon">💌</span>
+                <span class="mob-nav-label">Thư Tình</span>
+            </button>
+        </nav>
 
         <!-- Background Music Audio -->
         <audio id="bgMusic" loop preload="auto" src="vu_lalung.mp3">
