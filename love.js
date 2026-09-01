@@ -49,23 +49,13 @@ const shapeName = document.getElementById("shapeName");
 
 const SHAPE_STORIES = {
     galaxy: { text: "Trái tim xoay chuyển cùng dải ngân hà lung linh lấp lánh giữa vũ trụ bao la!", audio: "shape_galaxy.mp3" },
-    rose: { text: "Bông hồng tình yêu nở rộ, từng cánh hoa mang theo sự ngọt ngào dành riêng cho bạn!", audio: "shape_flower.mp3" },
     flower: { text: "Bông hồng tình yêu nở rộ, từng cánh hoa mang theo sự ngọt ngào dành riêng cho bạn!", audio: "shape_flower.mp3" },
-    orb: { text: "Quả cầu năng lượng ánh sáng phản chiếu ngàn tia lung linh ấm áp!", audio: "shape_sphere.mp3" },
     sphere: { text: "Quả cầu năng lượng ánh sáng phản chiếu ngàn tia lung linh ấm áp!", audio: "shape_sphere.mp3" },
-    infinity: { text: "Dải ruy băng 3D uốn lượn tượng trưng cho tình cảm vĩnh cửu không phai!", audio: "shape_ribbon.mp3" },
     ribbon: { text: "Dải ruy băng 3D uốn lượn tượng trưng cho tình cảm vĩnh cửu không phai!", audio: "shape_ribbon.mp3" },
-    glass: { text: "Khối pha lê trong suốt tỏa sáng tinh khiết và sưởi ấm trái tim bạn!", audio: "shape_crystal.mp3" },
     crystal: { text: "Khối pha lê trong suốt tỏa sáng tinh khiết và sưởi ấm trái tim bạn!", audio: "shape_crystal.mp3" }
 };
 
 function selectShape(shapeId) {
-    if (shapeId) {
-        if (shapeId === "flower") shapeId = "rose";
-        if (shapeId === "sphere") shapeId = "orb";
-        if (shapeId === "ribbon") shapeId = "infinity";
-        if (shapeId === "crystal") shapeId = "glass";
-    }
     const idx = SHAPES.findIndex(s => s.id === shapeId);
     if (idx !== -1) {
         currentShapeIdx = idx;
@@ -80,12 +70,7 @@ function selectShape(shapeId) {
     if (mobShapeIcon) mobShapeIcon.textContent = curShape.icon;
 
     document.querySelectorAll("#shapeChips .hub-chip").forEach(chip => {
-        const cShape = chip.getAttribute("data-shape");
-        if (cShape === curShape.id ||
-            (cShape === "flower" && curShape.id === "rose") ||
-            (cShape === "sphere" && curShape.id === "orb") ||
-            (cShape === "ribbon" && curShape.id === "infinity") ||
-            (cShape === "crystal" && curShape.id === "glass")) {
+        if (chip.getAttribute("data-shape") === curShape.id) {
             chip.classList.add("active");
         } else {
             chip.classList.remove("active");
@@ -2641,11 +2626,11 @@ function render(now) {
     ctx.save();
     ctx.translate(finalHeartX, finalHeartY);
     currentScale += (targetScale - currentScale) * 0.1;
-    const idleBreathing = 1.0 + Math.sin(now * 0.0022 * (typeof heartBeatSpeedFactor !== "undefined" ? heartBeatSpeedFactor : 1.0)) * 0.035;
+    const idleBreathing = 1.0 + Math.sin(now * 0.0022) * 0.035;
     let clickBeatScale = 1.0;
     if (isBeating) {
         const beatElapsed = now - heartbeatStartTime;
-        const duration = 650 / (typeof heartBeatSpeedFactor !== "undefined" ? heartBeatSpeedFactor : 1.0);
+        const duration = 650;
         if (beatElapsed < duration) {
             const beatProgress = beatElapsed / duration;
             const p1 = Math.sin(Math.min(1, beatProgress * 2.8) * Math.PI);
@@ -2970,7 +2955,7 @@ function initGooseSquad() {
 initGooseSquad();
 
 // ==========================================
-// 10.5 FLOATING MASTER PINK HEART CONTROL HUB CONTROLLER
+// 10.5 FLOATING CONTROL HUB CONTROLLER (TRUNG TÂM TIỆN ÍCH TINH GỌN)
 // ==========================================
 const controlHubModal = document.getElementById("controlHubModal");
 const hubToggleBtn = document.getElementById("hubToggleBtn");
@@ -3006,99 +2991,12 @@ if (hubBackdrop) hubBackdrop.addEventListener("click", (e) => {
     closeControlHub();
 });
 
-// Chuyển Đổi Các Tab Chức Năng Trong Hub Trái Tim Hồng
-const hubTabBtns = document.querySelectorAll(".hub-tab-btn");
-const hubTabPanels = document.querySelectorAll(".hub-tab-panel");
-
-hubTabBtns.forEach(tabBtn => {
-    tabBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const tabId = tabBtn.getAttribute("data-tab");
-        hubTabBtns.forEach(b => b.classList.remove("active"));
-        hubTabPanels.forEach(p => p.classList.remove("active"));
-        tabBtn.classList.add("active");
-        const activePanel = document.getElementById(tabId);
-        if (activePanel) activePanel.classList.add("active");
-        if (audioCtx) playChimeNote(783.99, 0, 0.15);
-    });
-});
-
-// Điều Chỉnh Kích Thước Trái Tim (Scale Slider)
-const heartScaleSlider = document.getElementById("heartScaleSlider");
-const scaleValueText = document.getElementById("scaleValueText");
-
-if (heartScaleSlider) {
-    heartScaleSlider.addEventListener("input", (e) => {
-        const val = parseInt(e.target.value, 10);
-        targetScale = Math.max(0.4, Math.min(3.0, val / 100));
-        if (scaleValueText) scaleValueText.textContent = `${val}%`;
-    });
-}
-
-// Điều Chỉnh Tốc Độ Nhịp Đập Tim (Heartbeat Speed Slider)
-const beatSpeedSlider = document.getElementById("beatSpeedSlider");
-const beatSpeedValueText = document.getElementById("beatSpeedValueText");
-let heartBeatSpeedFactor = 1.0;
-
-if (beatSpeedSlider) {
-    beatSpeedSlider.addEventListener("input", (e) => {
-        const val = parseInt(e.target.value, 10);
-        heartBeatSpeedFactor = val / 100;
-        if (beatSpeedValueText) {
-            if (val < 80) beatSpeedValueText.textContent = "Chậm êm";
-            else if (val > 130) beatSpeedValueText.textContent = "Cực nhanh 🔥";
-            else beatSpeedValueText.textContent = "Chuẩn ✨";
-        }
-    });
-}
-
-// Các Nút Hành Động Nhanh Trong Hub
-const hubRandomSongBtn = document.getElementById("hubRandomSongBtn");
-if (hubRandomSongBtn) {
-    hubRandomSongBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        closeControlHub();
-        playRandomSong(true);
-    });
-}
-
-const hubUploadMusicBtn = document.getElementById("hubUploadMusicBtn");
-if (hubUploadMusicBtn && musicFileInput) {
-    hubUploadMusicBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        closeControlHub();
-        musicFileInput.click();
-    });
-}
-
-const hubBurstHeartbeatBtn = document.getElementById("hubBurstHeartbeatBtn");
-if (hubBurstHeartbeatBtn) {
-    hubBurstHeartbeatBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        closeControlHub();
-        triggerHeartbeat();
-        setTimeout(() => triggerHeartbeat(), 280);
-    });
-}
-
-const hubShootingStarBtn = document.getElementById("hubShootingStarBtn");
-if (hubShootingStarBtn) {
-    hubShootingStarBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        closeControlHub();
-        for (let i = 0; i < 5; i++) {
-            setTimeout(() => spawnShootingStar(undefined, undefined, true), i * 160);
-        }
-        showToastCard("💫 Mưa Sao Băng Tình Yêu!", "Hãy nhắm mắt lại và ước nguyện một điều ngọt ngào nhất nha! ✨💖", 5000, "Mưa sao băng tình yêu! Hãy nhắm mắt lại và ước nguyện một điều ngọt ngào nhất nha!");
-    });
-}
-
 // Tự động đóng Control Hub khi người dùng bấm vào các nút chức năng mở popup khác
 const hubItemBtns = document.querySelectorAll(".hub-item-btn");
 hubItemBtns.forEach(btn => {
     btn.addEventListener("click", () => {
         const id = btn.id;
-        if (id === "openPlaylistBtn" || id === "letterBtn" || id === "authorBtn" || id === "tourGuideBtn" || id === "nameEditorBtn") {
+        if (id === "openPlaylistBtn" || id === "letterBtn" || id === "authorBtn" || id === "tourGuideBtn") {
             closeControlHub();
         }
     });
@@ -3119,9 +3017,9 @@ const TOUR_STEPS = [
     },
     {
         target: "#hubToggleBtn",
-        title: "💖 Bước 2: Trái Tim Tiện Ích",
-        desc: "Menu Trái Tim Màu Hồng mở ra toàn bộ tính năng & thuộc tính vũ trụ tình yêu! ⚙️💖",
-        voice: "Menu Trái Tim Màu Hồng mở ra toàn bộ tính năng và thuộc tính vũ trụ tình yêu!",
+        title: "✨ Bước 2: Menu Tiện Ích",
+        desc: "Menu Điều Khiển mở ra toàn bộ tính năng tùy biến không gian tình yêu! ⚙️",
+        voice: "Menu Điều Khiển mở ra toàn bộ tính năng tùy biến không gian tình yêu!",
         audio: "tour_step_2.mp3",
         placement: "bottom",
         closeHub: true
