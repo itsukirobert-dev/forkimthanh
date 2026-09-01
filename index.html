@@ -37,9 +37,9 @@
     <div class="top-controls">
         <!-- Đồng Hồ Đếm Ngày Yêu Nhau (Love Days Counter Widget) -->
         <div id="loveDaysWidget" class="love-days-widget glass-card-mini"
-            title="Bấm để mở tùy chỉnh tên & ngày kỷ niệm">
+            title="Bấm để mở dòng thời gian & ngày kỷ niệm">
             <span class="heart-pulse-icon">💖</span>
-            <span class="love-names-text" id="widgetNames">Mai IT &amp; Kim Thanh</span>
+            <span class="love-names-text" id="widgetNames">Mai IT &amp; Thanh Mimi</span>
             <span class="love-days-badge" id="widgetDaysText">Đã yêu: 365 ngày</span>
         </div>
 
@@ -69,7 +69,7 @@
 
                 <!-- 2.5. Kỷ Niệm & Ngày Yêu -->
                 <button id="topMilestoneBtn" class="dropdown-item-btn milestone-top-btn"
-                    title="Tùy Chỉnh Tên & Dòng Thời Gian Kỷ Niệm 💕">
+                    title="Dòng Thời Gian Kỷ Niệm Tình Yêu 💕">
                     <span class="dropdown-item-icon">✍️</span>
                     <span class="dropdown-item-text">Kỷ Niệm Yêu</span>
                 </button>
@@ -203,14 +203,14 @@
                     </button>
                 </div>
 
-                <!-- 6. Đổi Tên & Ngày Kỷ Niệm -->
+                <!-- 6. Kỷ Niệm Tình Yêu -->
                 <div class="hub-item-group single">
                     <button id="nameEditorBtn" class="hub-item-btn name-editor-btn"
-                        title="Tùy chỉnh tên người nhận & ngày yêu">
+                        title="Dòng thời gian & ngày kỷ niệm yêu thương">
                         <div class="hub-item-icon">✍️</div>
                         <div class="hub-item-info">
-                            <span class="hub-item-title">Tùy Chỉnh Tên & Kỷ Niệm</span>
-                            <span class="hub-item-desc">Đổi tên & ngày yêu nhau</span>
+                            <span class="hub-item-title">Kỷ Niệm Tình Yêu</span>
+                            <span class="hub-item-desc">Ngày yêu & dòng thời gian</span>
                         </div>
                     </button>
                 </div>
@@ -409,7 +409,7 @@
     <div id="gooseSquad" class="goose-squad">
         <!-- Goose 1: Bé Ngỗng Trắng Nơ Hồng (Đang lắc lư / nhún nhảy điệu Disco) -->
         <div class="goose-companion goose-white" data-goose="white" title="Bé Ngỗng Trắng Nơ Hồng 🪿🎀">
-            <div class="goose-bubble">Cạp cạp! Hôm nay Kim Thanh có nhớ người ta không đấy? 🪿💖</div>
+            <div class="goose-bubble">Cạp cạp! Hôm nay Thanh Mimi có nhớ người ta không đấy? 🪿💖</div>
             <div class="goose-wrapper">
                 <div class="goose-bow">🎀</div>
                 <div class="goose-head">
@@ -500,7 +500,7 @@
                                     IT</b></span>
                             <span class="route-arrow">➔</span>
                             <span class="recipient-badge"><span class="badge-icon">💖</span> Gửi: <b
-                                    id="readerRecipient">Kim Thanh</b></span>
+                                    id="readerRecipient">Thanh Mimi</b></span>
                         </div>
                         <div class="letter-meta-tags">
                             <span class="letter-mood-stamp" id="readerMood" title="Cảm xúc">💖</span>
@@ -560,7 +560,7 @@
                             Thư <span id="filterSenderName">Mai IT</span> (<span id="countSenderLetters">0</span>)
                         </button>
                         <button class="history-filter-chip" data-filter="recipient" id="filterRecipientLetters">
-                            Thư <span id="filterRecipientName">Kim Thanh</span> (<span
+                            Thư <span id="filterRecipientName">Thanh Mimi</span> (<span
                                 id="countRecipientLetters">0</span>)
                         </button>
                     </div>
@@ -884,15 +884,15 @@
         </div>
     </div>
 
-    <!-- Modal Tùy Chỉnh Tên & Lưu Trữ Dòng Thời Gian Kỷ Niệm (Custom Name & Love Milestone Timeline) -->
+    <!-- Modal Kỷ Niệm Tình Yêu & Lưu Trữ Dòng Thời Gian Kỷ Niệm (Love Milestone Timeline) -->
     <div id="nameEditorModal" class="letter-modal">
         <div class="letter-backdrop" id="nameEditorBackdrop"></div>
         <div class="letter-card letter-mailbox-card milestone-modal-card">
             <button class="close-letter-btn" id="closeNameEditorBtn" aria-label="Đóng">&times;</button>
             <div class="letter-header">
                 <span class="letter-stamp">✍️</span>
-                <h2 class="mailbox-main-title">Tùy Chỉnh Tên &amp; Kỷ Niệm Tình Yêu</h2>
-                <p class="mailbox-subtitle">Cài đặt tên, ngày yêu &amp; lưu trữ dòng thời gian kỷ niệm ngọt ngào 💕</p>
+                <h2 class="mailbox-main-title">Kỷ Niệm Tình Yêu</h2>
+                <p class="mailbox-subtitle">Ngày yêu nhau &amp; lưu trữ dòng thời gian kỷ niệm ngọt ngào 💕</p>
             </div>
 
             <!-- Tab Navigation Bar -->
@@ -924,12 +924,16 @@
                 <div class="name-editor-form">
                     <div class="form-row-duo">
                         <div class="form-group">
-                            <label>👑 Tên của bạn (Người gửi):</label>
-                            <input type="text" id="inputSenderName" value="Mai IT" placeholder="Ví dụ: Mai IT">
+                            <label>👑 Tên của bạn (Người gửi): <span
+                                    style="font-size:0.75rem;color:#ffd700;font-weight:600;">(Cố định 🔒)</span></label>
+                            <input type="text" id="inputSenderName" value="Mai IT" readonly disabled
+                                style="opacity: 0.9; cursor: not-allowed; background: rgba(255,255,255,0.06); border-color: rgba(255,215,0,0.4); font-weight: 600;">
                         </div>
                         <div class="form-group">
-                            <label>💖 Tên người nhận (Người thương):</label>
-                            <input type="text" id="inputRecipientName" value="Kim Thanh" placeholder="Ví dụ: Kim Thanh">
+                            <label>💖 Tên người thương: <span
+                                    style="font-size:0.75rem;color:#ffd700;font-weight:600;">(Cố định 🔒)</span></label>
+                            <input type="text" id="inputRecipientName" value="Thanh Mimi" readonly disabled
+                                style="opacity: 0.9; cursor: not-allowed; background: rgba(255,255,255,0.06); border-color: rgba(255,215,0,0.4); font-weight: 600;">
                         </div>
                     </div>
                     <div class="form-group">

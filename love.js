@@ -759,8 +759,11 @@ document.querySelectorAll(".hub-chip[data-theme]").forEach(chip => {
 // ==========================================
 // 3. HỘP THƯ TÌNH YÊU & LƯU TRỮ LỊCH SỬ THƯ (Love Mailbox & History System)
 // ==========================================
-let senderName = localStorage.getItem("love_sender_name") || "Mai IT";
-let recipientName = localStorage.getItem("love_recipient_name") || "Kim Thanh";
+let senderName = "Mai IT";
+let recipientName = "Thanh Mimi";
+localStorage.setItem("love_sender_name", senderName);
+localStorage.setItem("love_recipient_name", recipientName);
+
 let storedDate = localStorage.getItem("love_start_date");
 if (!storedDate || storedDate === "2024-01-01" || storedDate === "2026-08-30") {
     storedDate = "2026-08-30T13:30";
@@ -773,28 +776,23 @@ let customLoveLetter = localStorage.getItem("love_custom_letter") || "";
 const ROMANTIC_TEMPLATES = {
     morning: {
         title: "Chào buổi sáng rạng rỡ & ngọt ngào ☀️",
-        mood: "💖",
-        content: `Chào buổi sáng người anh/em yêu nhất! ☀️✨\n\nChúc em/anh một ngày mới thật nhiều năng lượng, làm việc hay học tập thật vui vẻ và luôn giữ nụ cười xinh trên môi nhé. Hãy nhớ là luôn có một người đang rất nhớ và thương em/anh ở đây nha! Yêu em/anh nhiều! 🌸🥰`
+        mood: "☀️",
+        content: `Chào buổi sáng cô gái/chàng trai tuyệt vời nhất của anh/em! 💖\n\nChúc em/anh một ngày mới tràn ngập năng lượng tích cực, công việc thuận lợi và nụ cười luôn nở rạng rỡ trên môi. Đừng quên ăn sáng đầy đủ và nhớ rằng luôn có một người yêu thương em/anh thật nhiều nhé! 🌸☕`
     },
     night: {
-        title: "Nhớ người thương giữa đêm ngàn sao 🌙",
+        title: "Chúc ngủ ngon & mơ giấc mơ đẹp 🌙",
         mood: "🌙",
-        content: `Đêm đã khuya rồi, ngoài trời gió mát và muôn ngàn vì sao đang lấp lánh... 🌌\n\nAnh/em chỉ muốn gửi một lời chúc ngủ ngon thật ấm áp đến em/anh. Hãy gạt bỏ hết mọi âu lo, mệt mỏi của ngày hôm nay và có một giấc ngủ thật ngon, mơ về những điều ngọt ngào nhất nhé! Yêu em/anh 3000! 💫❤️`
+        content: `Cả ngày hôm nay em/anh đã vất vả rồi, giờ là lúc thả lỏng và nghỉ ngơi thật ngon nhé. ✨\n\nNhắm mắt lại, chúc em/anh có một giấc ngủ thật êm đềm và mơ những giấc mơ thật ngọt ngào. Trong từng nhịp đập của trái tim này luôn có hình bóng của em/anh. Ngủ ngon nhé tình yêu của anh/em! 💤❤️`
     },
-    promise: {
-        title: "Lời hứa & ước hẹn bên nhau trọn đời 💍",
-        mood: "💍",
-        content: `Gửi người đặc biệt nhất trong cuộc đời anh/em... 💖\n\nDù thời gian có trôi qua bao lâu, dù thế giới ngoài kia có đổi thay thế nào, anh/em vẫn luôn hứa sẽ nắm chặt tay em/anh, cùng nhau vượt qua mọi khó khăn và xây đắp một tương lai thật hạnh phúc. Mãi mãi bên nhau nhé! 💍✨`
+    anniversary: {
+        title: "Kỷ niệm từng ngày yêu thương đong đầy 🥂",
+        mood: "🥂",
+        content: `Mỗi ngày trôi qua được đồng hành cùng em/anh đều là một món quà vô giá mà cuộc sống ban tặng. 🌹\n\nCảm ơn vì những yêu thương, sẻ chia và cả những điều giản dị nhất chúng mình đã cùng trải qua. Hãy cùng nhau đi thật xa trên chặng đường phía trước nhé! Forever & Always! 💍✨`
     },
-    thanks: {
-        title: "Cảm ơn vì đã luôn ở bên cạnh 🌸",
-        mood: "🌸",
-        content: `Cảm ơn em/anh vì đã bước vào cuộc sống của anh/em, mang đến cho anh/em những nụ cười, sự ấm áp và bình yên.\n\nCó em/anh ở bên cạnh, mỗi ngày bình thường đều trở nên thật kỳ diệu. Cảm ơn em/anh vì tất cả những yêu thương và sự dịu dàng dành cho anh/em! 🌸💖`
-    },
-    sorry: {
-        title: "Lời xin lỗi & dỗ dành người yêu 🥺",
-        mood: "🥺",
-        content: `Anh/em biết hôm nay mình đã làm em/anh buồn một chút rồi... 🥺🐾\n\nAnh/em xin lỗi người yêu nhiều lắm nha! Đừng giận anh/em nữa nhé, cho anh/em xin một cái ôm thật chặt để bù đắp nè. Anh/em thương em/anh nhất trên đời luôn á! Mau cười lên với anh/em nha! 🍓💖`
+    miss: {
+        title: "Nhớ em/anh thật nhiều lúc này... 💌",
+        mood: "💌",
+        content: `Bất chợt nhìn lên bầu trời đầy sao, lòng lại nhớ đến em/anh da diết. ✨\n\nƯớc gì ngay lúc này được ở cạnh bên, nắm chặt bàn tay ấm áp và lắng nghe giọng nói dịu dàng quen thuộc ấy. Gửi đến em/anh ngàn nụ hôn và cái ôm thật chặt từ nơi xa! 💕`
     },
     weekend: {
         title: "Hẹn hò cuối tuần lãng mạn ☕",
@@ -805,7 +803,7 @@ const ROMANTIC_TEMPLATES = {
 
 function getDefaultLetters() {
     const sName = senderName || "Mai IT";
-    const rName = recipientName || "Kim Thanh";
+    const rName = recipientName || "Thanh Mimi";
     const firstContent = customLoveLetter || `Giữa hơn 8 tỷ người trên trái đất và muôn ngàn vì sao trong vũ trụ bao la, gặp được em là điều kỳ diệu và may mắn nhất của ${sName}.\n\nCảm ơn em vì đã đến, mang theo nụ cười rạng rỡ và sưởi ấm thế giới này. Chúc em mỗi ngày đều tràn ngập niềm vui, tiếng cười và luôn luôn hạnh phúc nhé! ❤️`;
 
     return [
@@ -921,7 +919,18 @@ function loadLoveLetters() {
         if (raw) {
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed) && parsed.length > 0) {
-                loveLetters = parsed;
+                loveLetters = parsed.map(l => {
+                    let updatedSender = l.sender;
+                    let updatedRecipient = l.recipient;
+                    if (updatedSender === "Kim Thanh") updatedSender = "Thanh Mimi";
+                    if (updatedRecipient === "Kim Thanh") updatedRecipient = "Thanh Mimi";
+                    return {
+                        ...l,
+                        sender: updatedSender,
+                        recipient: updatedRecipient
+                    };
+                });
+                saveLoveLetters(loveLetters);
                 updateLetterHistoryBadge();
                 return;
             }
@@ -1023,12 +1032,15 @@ function displayLetter(idxOrId, shouldTypewrite = true) {
     const letter = loveLetters[idx];
     if (!letter) return;
 
-    if (readerSender) readerSender.textContent = letter.sender || senderName;
-    if (readerRecipient) readerRecipient.textContent = letter.recipient || recipientName;
+    const effectiveSender = (letter.sender === "Kim Thanh" ? "Thanh Mimi" : letter.sender) || senderName;
+    const effectiveRecipient = (letter.recipient === "Kim Thanh" ? "Thanh Mimi" : letter.recipient) || recipientName;
+
+    if (readerSender) readerSender.textContent = effectiveSender;
+    if (readerRecipient) readerRecipient.textContent = effectiveRecipient;
     if (readerMood) readerMood.textContent = letter.mood || "💖";
     if (readerDate) readerDate.textContent = formatLetterDate(letter.date);
     if (readerTitle) readerTitle.textContent = letter.title || "Gửi Người Đặc Biệt Nhất... ✨";
-    if (readerSignature) readerSignature.textContent = `Forever With Love ❤️ • ${letter.sender || senderName}`;
+    if (readerSignature) readerSignature.textContent = `Forever With Love ❤️ • ${effectiveSender}`;
 
     if (letterPageIndicator) {
         letterPageIndicator.textContent = `Thư ${idx + 1} / ${loveLetters.length}`;
@@ -1097,7 +1109,7 @@ function renderLetterHistory(query = "", filter = "all") {
     historyFilterType = filter || "all";
 
     const sName = (senderName || "Mai IT").toLowerCase();
-    const rName = (recipientName || "Kim Thanh").toLowerCase();
+    const rName = (recipientName || "Thanh Mimi").toLowerCase();
 
     const filtered = loveLetters.filter(letter => {
         const matchesQuery = !historySearchQuery ||
@@ -1124,7 +1136,7 @@ function renderLetterHistory(query = "", filter = "all") {
     if (countSenderLetters) countSenderLetters.textContent = senderCount;
     if (countRecipientLetters) countRecipientLetters.textContent = recipientCount;
     if (filterSenderName) filterSenderName.textContent = senderName || "Mai IT";
-    if (filterRecipientName) filterRecipientName.textContent = recipientName || "Kim Thanh";
+    if (filterRecipientName) filterRecipientName.textContent = recipientName || "Thanh Mimi";
 
     if (filtered.length === 0) {
         letterHistoryList.innerHTML = `
@@ -1231,7 +1243,7 @@ function copyLetterContent(letterId) {
 
 function setupSenderRecipientChoices(currSender, currRecipient) {
     const sName = senderName || "Mai IT";
-    const rName = recipientName || "Kim Thanh";
+    const rName = recipientName || "Thanh Mimi";
 
     const effectiveSender = currSender || sName;
     const effectiveRecipient = currRecipient || rName;
@@ -1390,7 +1402,7 @@ function handleReplyLetter() {
     if (saveLetterBtnIcon) saveLetterBtnIcon.textContent = "💌";
     if (saveLetterBtnText) saveLetterBtnText.textContent = "Gửi Lời Hồi Đáp";
 
-    const replySender = currentLetter.recipient || recipientName || "Kim Thanh";
+    const replySender = currentLetter.recipient || recipientName || "Thanh Mimi";
     const replyRecipient = currentLetter.sender || senderName || "Mai IT";
     setupSenderRecipientChoices(replySender, replyRecipient);
 
@@ -1419,7 +1431,7 @@ function saveLetterForm() {
         }
     }
 
-    let chosenRecipient = recipientName || "Kim Thanh";
+    let chosenRecipient = recipientName || "Thanh Mimi";
     const activeRecipientChip = recipientChoiceRow ? recipientChoiceRow.querySelector(".choice-chip.active") : null;
     if (activeRecipientChip) {
         const val = activeRecipientChip.getAttribute("data-val");
@@ -1654,7 +1666,7 @@ function resetDefaultLettersList() {
 
 function syncLoveLetterNames() {
     if (filterSenderName) filterSenderName.textContent = senderName || "Mai IT";
-    if (filterRecipientName) filterRecipientName.textContent = recipientName || "Kim Thanh";
+    if (filterRecipientName) filterRecipientName.textContent = recipientName || "Thanh Mimi";
     setupSenderRecipientChoices(senderName, recipientName);
     renderLetterHistory(historySearchQuery, historyFilterType);
     if (loveLetters && loveLetters.length > 0) {
@@ -1768,7 +1780,7 @@ if (letterTemplateSelect) {
         const tmpl = ROMANTIC_TEMPLATES[key];
 
         const sName = senderName || "Mai IT";
-        const rName = recipientName || "Kim Thanh";
+        const rName = recipientName || "Thanh Mimi";
         let filledContent = tmpl.content;
         filledContent = filledContent.replace(/em\/anh/g, rName).replace(/anh\/em/g, sName);
 
@@ -3078,6 +3090,15 @@ try {
     const rawMilestones = localStorage.getItem("love_milestones_history");
     if (rawMilestones) {
         loveMilestones = JSON.parse(rawMilestones);
+        if (Array.isArray(loveMilestones)) {
+            loveMilestones = loveMilestones.map(m => {
+                if (m.desc && m.desc.includes("Kim Thanh")) {
+                    m.desc = m.desc.replace(/Kim Thanh/g, "Thanh Mimi");
+                }
+                return m;
+            });
+            localStorage.setItem("love_milestones_history", JSON.stringify(loveMilestones));
+        }
     }
 } catch (e) {
     console.error("Lỗi đọc love_milestones_history:", e);
@@ -3112,9 +3133,19 @@ function updateLoveDays() {
 }
 
 function applyCustomSettings() {
+    senderName = "Mai IT";
+    recipientName = "Thanh Mimi";
     updateLoveDays();
-    if (inputSenderName) inputSenderName.value = senderName;
-    if (inputRecipientName) inputRecipientName.value = recipientName;
+    if (inputSenderName) {
+        inputSenderName.value = "Mai IT";
+        inputSenderName.readOnly = true;
+        inputSenderName.disabled = true;
+    }
+    if (inputRecipientName) {
+        inputRecipientName.value = "Thanh Mimi";
+        inputRecipientName.readOnly = true;
+        inputRecipientName.disabled = true;
+    }
     if (inputLoveDate) inputLoveDate.value = loveStartDate;
     if (inputCustomMessage) inputCustomMessage.value = customLoveLetter;
     renderMilestonesTimeline(milestoneSearchQuery);
@@ -3511,13 +3542,13 @@ document.querySelectorAll("#nameEditorModal .letter-nav-tab").forEach(tab => {
 
 if (saveNameSettingsBtn) {
     saveNameSettingsBtn.addEventListener("click", () => {
-        senderName = (inputSenderName && inputSenderName.value.trim()) || "Mai IT";
-        recipientName = (inputRecipientName && inputRecipientName.value.trim()) || "Kim Thanh";
+        senderName = "Mai IT";
+        recipientName = "Thanh Mimi";
         loveStartDate = (inputLoveDate && inputLoveDate.value) || "2026-08-30T13:30";
         customLoveLetter = (inputCustomMessage && inputCustomMessage.value.trim()) || "";
 
-        localStorage.setItem("love_sender_name", senderName);
-        localStorage.setItem("love_recipient_name", recipientName);
+        localStorage.setItem("love_sender_name", "Mai IT");
+        localStorage.setItem("love_recipient_name", "Thanh Mimi");
         localStorage.setItem("love_start_date", loveStartDate);
         localStorage.setItem("love_custom_letter", customLoveLetter);
 
@@ -4621,7 +4652,7 @@ initCatSquad();
 // 10.3 CUTE INTERACTIVE GOOSE DUO (Đôi Bé Ngỗng Quẩy Dễ Thương)
 // ==========================================
 const GOOSE_QUOTES = {
-    white: "Cạp cạp! Hôm nay Kim Thanh có nhớ người ta không đấy? Tui là ngỗng tình yêu mang ngàn điều may mắn đến cho bạn nè! 🪿💖",
+    white: "Cạp cạp! Hôm nay Thanh Mimi có nhớ người ta không đấy? Tui là ngỗng tình yêu mang ngàn điều may mắn đến cho bạn nè! 🪿💖",
     gold: "Honk honk! Đố bạn biết ai yêu bạn nhất trên đời? Là người gửi món quà này cho bạn đấy nhé! 🪿👑✨"
 };
 
@@ -4917,9 +4948,9 @@ const TOUR_STEPS = [
     {
         target: "#nameEditorBtn",
         targetId: "nameEditorBtn",
-        title: "✨ Bước 9: Tùy Chỉnh Tên & Dòng Kỷ Niệm",
-        desc: "Cá nhân hóa tên hai bạn, thiết lập ngày yêu và lưu trữ trọn vẹn toàn bộ dòng thời gian kỷ niệm ngọt ngào!",
-        voice: "Cá nhân hóa tên hai bạn, thiết lập ngày yêu và lưu trữ trọn vẹn toàn bộ dòng thời gian kỷ niệm ngọt ngào!",
+        title: "✨ Bước 9: Kỷ Niệm Tình Yêu",
+        desc: "Thiết lập ngày yêu và lưu trữ trọn vẹn toàn bộ dòng thời gian kỷ niệm ngọt ngào của hai bạn!",
+        voice: "Thiết lập ngày yêu và lưu trữ trọn vẹn toàn bộ dòng thời gian kỷ niệm ngọt ngào của hai bạn!",
         audio: "tour_step_9.mp3",
         placement: "bottom",
         openHub: true
